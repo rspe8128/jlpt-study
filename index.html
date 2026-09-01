@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="JLPT N4·N5 한자·단어·히라가나 학습 목차" />
+  <meta name="theme-color" content="#0c1016" />
+  <title>JLPT N4·N5 학습 · 목차</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap"
+    media="print"
+    onload="this.media='all'"
+  />
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+  </noscript>
+  <style>
+    :root {
+      --bg: #0c1016;
+      --card: #1a2330;
+      --border: #2a3848;
+      --text: #e8edf4;
+      --muted: #8b9cb3;
+      --accent: #5b9fd4;
+      --n5: #7ec8a3;
+      --n4: #e6b85c;
+    }
+    * { box-sizing: border-box; }
+    html { font-size: 18px; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: "Noto Sans KR", system-ui, sans-serif;
+      background: radial-gradient(ellipse 100% 60% at 50% 0%, #1a3350, var(--bg));
+      color: var(--text);
+      padding: 28px 18px 40px;
+      line-height: 1.55;
+    }
+    .wrap { max-width: 640px; margin: 0 auto; }
+    h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin: 0 0 10px;
+      letter-spacing: -0.02em;
+    }
+    .lead { color: var(--muted); font-size: 1.02rem; margin: 0 0 32px; line-height: 1.6; }
+    .lead a { color: var(--accent); }
+    ul.nav { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+    a.tile {
+      display: block;
+      padding: 22px 22px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    a.tile:hover { border-color: var(--accent); background: #1f2a3a; }
+    a.tile strong { display: block; font-size: 1.2rem; margin-bottom: 8px; }
+    a.tile span { font-size: 0.95rem; color: var(--muted); line-height: 1.55; }
+    a.tile.hira strong { color: #c9a8e8; }
+    a.tile.n5 strong { color: var(--n5); }
+    a.tile.n4 strong { color: var(--n4); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>JLPT N4·N5 통합 학습</h1>
+    <p class="lead">
+      급수를 고른 뒤 <a href="study.html">study.html</a>에서 <strong>한자</strong>·<strong>단어</strong>를 학습합니다. 단어는 <strong>전체</strong>·<strong>기존</strong>(PDF 4종)·<strong>신규</strong>(N1–N5 통합 추가분) 풀을 나눠 플래시카드·객관식으로 볼 수 있습니다.
+    </p>
+
+    <ul class="nav">
+      <li>
+        <a class="tile hira" href="study.html#hira">
+          <strong>히라가나</strong>
+          <span>清音 46자 · 플래시카드 · 표(뒤집기) · 로마자 객관식</span>
+        </a>
+      </li>
+      <li>
+        <a class="tile n5" href="study.html#n5">
+          <strong>N5</strong>
+          <span>한자 110자 · 단어 574(기존 100·신규 475) · 플래시카드 · 객관식 · 주관식</span>
+        </a>
+      </li>
+      <li>
+        <a class="tile n4" href="study.html#n4">
+          <strong>N4</strong>
+          <span>한자 665자 · 단어 868(기존 251·신규 739) · 플래시카드 · 객관식 · 주관식</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>

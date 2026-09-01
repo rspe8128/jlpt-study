@@ -1,0 +1,7186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="JLPT N4·N5 한자·단어·히라가나 플래시카드와 퀴즈 학습" />
+  <meta name="theme-color" content="#0f1419" />
+  <title>JLPT N4·N5 통합 학습 (study)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&family=Noto+Sans+KR:wght@400;600&display=swap"
+    media="print"
+    onload="this.media='all'"
+  />
+  <noscript>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&family=Noto+Sans+KR:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </noscript>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e8edf4;
+      --muted: #8b9cb3;
+      --accent: #5b9fd4;
+      --accent2: #7ec8a3;
+      --danger: #e07a7a;
+      --radius: 18px;
+      --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+      --content-max: 600px;
+      --card-max-w: 460px;
+      --card-max-h: 620px;
+    }
+    * { box-sizing: border-box; }
+    [hidden] {
+      display: none !important;
+    }
+    html {
+      margin: 0;
+      min-height: 100%;
+      font-size: 18px;
+      scrollbar-gutter: stable;
+    }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: "Noto Sans KR", "Noto Sans JP", system-ui, sans-serif;
+      background: radial-gradient(ellipse 120% 80% at 50% -20%, #1e3a5f 0%, var(--bg) 55%);
+      background-attachment: fixed;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      overflow-x: hidden;
+    }
+    /* 상단 탭·모드 바: 콘텐츠 상단에 고정 (모드 전환 시 왼쪽으로 밀림 방지) */
+    .tier1.seg,
+    .tier2.seg,
+    .mode-bar.seg {
+      align-self: center;
+      margin-inline: auto;
+      flex-shrink: 0;
+      max-width: 100%;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 10px;
+      max-width: var(--content-max);
+    }
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 12px;
+      max-width: var(--content-max);
+    }
+    .seg {
+      display: inline-flex;
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 4px;
+      border: 1px solid var(--surface2);
+    }
+    .seg button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 10px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+    .seg button.active {
+      background: var(--surface2);
+      color: var(--text);
+      font-weight: 600;
+    }
+    .btn {
+      border: 1px solid var(--surface2);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--muted); }
+    .btn:active { transform: scale(0.98); }
+    .btn.primary {
+      background: linear-gradient(135deg, #3d7ab8, #2d5f8f);
+      border-color: transparent;
+    }
+    .btn.primary:hover { filter: brightness(1.08); }
+    .progress {
+      font-size: 0.95rem;
+      color: var(--muted);
+      min-width: 8em;
+      text-align: center;
+    }
+    .scene {
+      perspective: 1200px;
+      width: min(100%, var(--card-max-w));
+      aspect-ratio: 4 / 5;
+      max-height: min(76dvh, var(--card-max-h));
+      margin-bottom: 18px;
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .card-face.front {
+      background: linear-gradient(160deg, var(--surface) 0%, #151d28 100%);
+    }
+    .card-face.back {
+      background: linear-gradient(160deg, #1a2838 0%, var(--surface) 100%);
+      transform: rotateY(180deg);
+    }
+    .badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: var(--surface2);
+      color: var(--accent);
+    }
+    .badge.n5 { color: var(--accent2); }
+    .badge.n4 { color: #e6b85c; }
+    .index-num {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .kanji {
+      font-family: "Noto Sans JP", serif;
+      font-size: clamp(5rem, 24vw, 7.75rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+    }
+    .hint {
+      margin-top: 22px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    .meaning {
+      font-size: clamp(1.15rem, 4.5vw, 1.45rem);
+      line-height: 1.55;
+      text-align: center;
+      color: var(--text);
+      font-weight: 400;
+      max-height: 100%;
+      overflow-y: auto;
+    }
+    .nav-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    kbd {
+      font-family: inherit;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--surface);
+    }
+    .mode-bar {
+      margin-bottom: 0;
+    }
+    .mode-bar.seg button { padding: 12px 20px; font-size: 0.95rem; }
+    #shellHira .mode-bar { margin-bottom: 10px; }
+    .view {
+      width: 100%;
+      max-width: var(--content-max);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: center;
+    }
+    .view[hidden] { display: none !important; }
+    .quiz-panel {
+      width: 100%;
+      max-width: var(--content-max);
+      background: var(--surface);
+      border: 1px solid var(--surface2);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .quiz-panel > h2,
+    .quiz-panel > .quiz-progress,
+    .quiz-panel > .result-score,
+    .quiz-panel > .result-detail {
+      text-align: center;
+    }
+    .quiz-panel > .mode-bar.seg {
+      align-self: center;
+      margin-bottom: 14px;
+    }
+    .quiz-panel .quiz-field,
+    .quiz-panel .quiz-options,
+    .quiz-panel .quiz-actions,
+    .quiz-panel .written-feedback,
+    .quiz-panel .wrong-review-wrap {
+      width: 100%;
+      max-width: 100%;
+    }
+    .quiz-panel h2 {
+      margin: 0 0 18px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .quiz-field {
+      margin-bottom: 16px;
+    }
+    .quiz-field label {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    select.quiz-select {
+      width: 100%;
+      font-family: inherit;
+      font-size: 1.05rem;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--surface2);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .quiz-q-kanji {
+      font-family: "Noto Sans JP", serif;
+      font-size: clamp(4rem, 18vw, 6rem);
+      font-weight: 700;
+      text-align: center;
+      margin: 8px 0 4px;
+    }
+    .quiz-q-word {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: clamp(1.85rem, 7.5vw, 2.9rem);
+      font-weight: 700;
+      text-align: center;
+      margin: 8px 0 4px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .quiz-q-hint {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .quiz-opt {
+      text-align: left;
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--surface2);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1.45;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      overflow-wrap: anywhere;
+      word-break: keep-all;
+    }
+    .quiz-opt:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: #2a3d55;
+    }
+    .quiz-opt:disabled { cursor: default; opacity: 0.85; }
+    .quiz-opt.correct {
+      border-color: var(--accent2);
+      background: rgba(126, 200, 163, 0.15);
+    }
+    .quiz-opt.wrong {
+      border-color: var(--danger);
+      background: rgba(224, 122, 122, 0.12);
+    }
+    .quiz-opt .opt-key {
+      display: inline-block;
+      min-width: 1.5em;
+      font-weight: 700;
+      color: var(--accent);
+      margin-right: 8px;
+    }
+    .quiz-progress {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .quiz-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .result-score {
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 12px 0;
+      color: var(--accent2);
+    }
+    .result-detail {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .wrong-review-wrap {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--surface2);
+      text-align: left;
+      width: 100%;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .wrong-review-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: var(--text);
+    }
+    .wrong-review-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .wrong-review-item {
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--surface2);
+      background: var(--surface);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+    .wrong-q {
+      font-family: "Noto Sans JP", serif;
+      font-size: 1.65rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .wrong-q.word-q {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: 1.2rem;
+    }
+    .wrong-review-line {
+      margin-top: 6px;
+      color: var(--muted);
+    }
+    .wrong-lab {
+      color: var(--accent);
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .wrong-val {
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .badge.hira {
+      color: #c9a8e8;
+    }
+    .hira-char {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: clamp(4.75rem, 22vw, 7.25rem);
+      font-weight: 700;
+      line-height: 1.1;
+      text-align: center;
+      color: var(--text);
+    }
+    .quiz-q-kanji.hira-quiz-kana {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: clamp(3.75rem, 17vw, 5.5rem);
+    }
+    .hira-chart-wrap {
+      width: 100%;
+      max-width: 540px;
+      margin: 0 auto 12px;
+    }
+    .hira-chart-caption {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+      margin: 0 0 12px;
+      line-height: 1.5;
+    }
+    .hira-chart-row {
+      display: grid;
+      grid-template-columns: 44px repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: stretch;
+    }
+    .hira-chart-row-head .hira-chart-label {
+      font-size: 0.58rem;
+      line-height: 1.2;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .hira-chart-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.2;
+      padding: 2px;
+    }
+    .hira-chart-tile {
+      aspect-ratio: 1;
+      min-height: 52px;
+      max-height: 84px;
+      perspective: 600px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hira-chart-tile-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      transition: transform 0.45s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+    .hira-chart-tile.flipped .hira-chart-tile-inner {
+      transform: rotateY(180deg);
+    }
+    .hira-chart-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 10px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border: 1px solid var(--surface2);
+      background: linear-gradient(160deg, var(--surface) 0%, #151d28 100%);
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: clamp(1.05rem, 3.8vw, 1.45rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.15;
+    }
+    .hira-chart-face.back {
+      transform: rotateY(180deg);
+      background: linear-gradient(160deg, #1a2838 0%, var(--surface) 100%);
+      font-size: clamp(0.72rem, 2.6vw, 0.88rem);
+      font-weight: 600;
+      color: var(--accent2);
+      gap: 2px;
+    }
+    .hira-chart-face .hira-chart-romaji {
+      font-size: clamp(0.85rem, 3vw, 1rem);
+      color: var(--accent);
+    }
+    .hira-chart-face .hira-chart-rowko {
+      font-size: 0.62rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.25;
+    }
+    .hira-chart-empty {
+      min-height: 52px;
+      border-radius: 10px;
+      border: 1px dashed rgba(255, 255, 255, 0.06);
+      background: rgba(0, 0, 0, 0.12);
+      pointer-events: none;
+    }
+    .hira-chart-toolbar {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .vocab-list-wrap {
+      width: 100%;
+      max-width: var(--content-max);
+      margin: 0 auto 24px;
+      align-self: center;
+    }
+    .vocab-list-caption {
+      margin: 0 0 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.55;
+    }
+    .vocab-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--surface2);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .vocab-list-row {
+      display: grid;
+      grid-template-columns: 2.5rem minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 10px 14px;
+      align-items: center;
+      width: 100%;
+      margin: 0;
+      padding: 14px 16px;
+      border: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease;
+      content-visibility: auto;
+      contain-intrinsic-size: auto 52px;
+    }
+    .vocab-list-row:last-child {
+      border-bottom: none;
+    }
+    .vocab-list-row:hover {
+      background: rgba(91, 159, 212, 0.07);
+    }
+    .vocab-list-row.revealed {
+      background: rgba(126, 200, 163, 0.06);
+    }
+    .vocab-list-row:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+    .vocab-list-num {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .vocab-list-word {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: clamp(1.08rem, 3.5vw, 1.32rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .vocab-list-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      text-align: right;
+    }
+    .vocab-list-reading {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: var(--accent);
+      line-height: 1.35;
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: opacity 0.2s ease, max-height 0.25s ease;
+    }
+    .vocab-list-row.revealed .vocab-list-reading {
+      opacity: 1;
+      max-height: 3em;
+    }
+    .vocab-list-meaning {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.45;
+      letter-spacing: 0.12em;
+      transition: color 0.2s ease;
+    }
+    .vocab-list-row.revealed .vocab-list-meaning {
+      color: var(--accent2);
+      letter-spacing: normal;
+    }
+    .vocab-list-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px 12px;
+      margin-bottom: 12px;
+    }
+    .vocab-list-toolbar .progress {
+      margin: 0;
+    }
+    .mode-bar.seg {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .written-inp {
+      width: 100%;
+      font-family: inherit;
+      font-size: 1.1rem;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--surface2);
+      background: #0d1218;
+      color: var(--text);
+      margin-top: 6px;
+    }
+    .written-inp:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(91, 159, 212, 0.25);
+    }
+    .written-inp:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+    .written-feedback {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .written-feedback.ok {
+      border: 1px solid rgba(126, 200, 163, 0.45);
+      background: rgba(126, 200, 163, 0.12);
+      color: var(--accent2);
+    }
+    .written-feedback.bad {
+      border: 1px solid rgba(224, 122, 122, 0.45);
+      background: rgba(224, 122, 122, 0.1);
+      color: #f0b0b0;
+    }
+    .written-feedback .ans-line {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .site-crumb {
+      width: 100%;
+      max-width: var(--content-max);
+      margin: -4px 0 8px;
+      font-size: 0.92rem;
+      align-self: center;
+      box-sizing: border-box;
+    }
+    .site-crumb a { color: var(--accent); text-decoration: none; }
+    .site-crumb a:hover { text-decoration: underline; }
+    .tier1 { margin-bottom: 8px; }
+    .tier1.seg button { padding: 10px 18px; font-size: 0.95rem; }
+    .tier2 { margin-bottom: 0; }
+    .nav-combo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px 8px;
+      margin-bottom: 10px;
+      align-self: center;
+      max-width: 100%;
+    }
+    .nav-combo-sep {
+      width: 1px;
+      height: 26px;
+      background: var(--surface2);
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .nav-combo .seg.compact button {
+      padding: 7px 13px;
+      font-size: 0.86rem;
+    }
+    .pool-select {
+      font-family: inherit;
+      font-size: 0.86rem;
+      padding: 9px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--surface2);
+      background: var(--surface);
+      color: var(--text);
+      max-width: 11.5em;
+      cursor: pointer;
+    }
+    .pool-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .toolbar .pool-select { flex: 0 1 auto; }
+    .shell,
+    .shell-sub {
+      width: 100%;
+      max-width: var(--content-max);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: center;
+      box-sizing: border-box;
+    }
+    .shell[hidden],
+    .shell-sub[hidden] { display: none !important; }
+    .mode-bar.seg {
+      width: auto;
+    }
+    .toolbar,
+    .nav-row,
+    .hira-chart-toolbar {
+      width: 100%;
+      max-width: var(--content-max);
+      box-sizing: border-box;
+    }
+    .word {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: clamp(1.85rem, 7.5vw, 2.9rem);
+      font-weight: 700;
+      line-height: 1.35;
+      text-align: center;
+      color: var(--text);
+    }
+    .front-reading {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+      font-weight: 500;
+      text-align: center;
+      color: var(--accent);
+      margin-top: 10px;
+      line-height: 1.5;
+      max-width: 100%;
+    }
+    .back-reading {
+      font-family: "Noto Sans JP", sans-serif;
+      font-size: clamp(1.2rem, 4.5vw, 1.55rem);
+      font-weight: 500;
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .back-meaning {
+      font-size: clamp(1.05rem, 4vw, 1.3rem);
+      text-align: center;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .vocab-placeholder h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      text-align: center;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .card-inner,
+      .hira-chart-inner,
+      .vocab-list-reading {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="appTitle">JLPT N4·N5 학습</h1>
+    <p id="appSubtitle">카드를 눌러 앞·뒤를 뒤집어요 · <kbd>Space</kbd> 뒤집기 ·  <kbd>←</kbd><kbd>→</kbd> 이동</p>
+  </header>
+
+  <p class="site-crumb"><a href="index.html">← 전체 목차 (index)</a></p>
+  <div class="tier1 seg" role="tablist" aria-label="급수">
+    <button type="button" role="tab" id="tabCatHira" aria-selected="false">히라가나</button>
+    <button type="button" role="tab" id="tabCatN5" class="active" aria-selected="true">N5</button>
+    <button type="button" role="tab" id="tabCatN4" aria-selected="false">N4</button>
+  </div>
+
+  <div id="shellLevel" class="shell">
+  <nav class="nav-combo" id="navComboLevel" aria-label="학습 메뉴">
+    <div class="tier2 seg compact" role="tablist" aria-label="학습 종목">
+    <button type="button" role="tab" id="tabSubKanji" class="active" aria-selected="true">한자</button>
+    <button type="button" role="tab" id="tabSubVocab" aria-selected="false">단어</button>
+    </div>
+    <span class="nav-combo-sep" id="navComboSep" aria-hidden="true"></span>
+    <div id="modeBarKanji" class="mode-bar seg compact" role="tablist" aria-label="학습 모드">
+      <button type="button" role="tab" id="tabCards" class="active" aria-selected="true">플래시카드</button>
+      <button type="button" role="tab" id="tabQuiz" aria-selected="false">객관식</button>
+      <button type="button" role="tab" id="tabWritten" aria-selected="false">주관식</button>
+    </div>
+    <div id="modeBarVocab" class="mode-bar seg compact" role="tablist" aria-label="단어 학습 상태" hidden>
+      <button type="button" role="tab" id="tabVocabCards" class="active" aria-selected="true">플래시카드</button>
+      <button type="button" role="tab" id="tabVocabList" aria-selected="false">목록</button>
+      <button type="button" role="tab" id="tabVocabQuiz" aria-selected="false">객관식</button>
+    </div>
+  </nav>
+
+  <div id="shellKanji" class="shell-sub">
+  <section id="viewCards" class="view" aria-labelledby="tabCards">
+  <div class="toolbar">
+    <button type="button" class="btn" id="btnShuffle">섞기</button>
+    <span class="progress" id="progress">1 / 110</span>
+  </div>
+
+  <div class="scene">
+    <div class="card" id="card" tabindex="0" role="button" aria-label="플래시카드, 누러 뒤집기">
+      <div class="card-inner">
+        <div class="card-face front">
+          <span class="badge" id="levelBadge">N5</span>
+          <span class="index-num" id="indexNum">001</span>
+          <span class="kanji" id="kanjiFront">一</span>
+          <span class="hint">뒤 보기</span>
+        </div>
+        <div class="card-face back">
+          <span class="badge" id="levelBadgeBack">N5</span>
+          <span class="index-num" id="indexNumBack">001</span>
+          <p class="meaning" id="meaningBack"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button type="button" class="btn" id="btnPrev">이전</button>
+    <button type="button" class="btn primary" id="btnFlip">뒤집기</button>
+    <button type="button" class="btn" id="btnNext">다음</button>
+  </div>
+  </section>
+
+  <section id="viewQuiz" class="view" hidden aria-labelledby="tabQuiz">
+    <div id="quizSetup" class="quiz-panel">
+      <h2>퀴즈 설정</h2>
+      <div class="quiz-field">
+        <label for="quizCount">한 세트 문제 수</label>
+        <select id="quizCount" class="quiz-select"></select>
+      </div>
+      <p style="margin:0 0 14px;font-size:0.78rem;color:var(--muted);text-align:center;line-height:1.5;">
+        한자를 주어진 <strong>뜻·음</strong>에 맞는 보기 하나를 고릅니다.<br />
+        문제 순서와 보기 순서는 세트마다 무작위입니다. (보기 4개)
+      </p>
+      <div class="quiz-actions" style="margin-top:0;">
+        <button type="button" class="btn primary" id="quizStart" style="min-width:160px;">퀴즈 시작</button>
+      </div>
+    </div>
+
+    <div id="quizPlay" class="quiz-panel" hidden tabindex="-1">
+      <div class="quiz-progress" id="quizProgress">1 / 10</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="badge" id="quizLevelBadge">N5</span>
+        <span class="index-num" id="quizIdNum">001</span>
+      </div>
+      <div class="quiz-q-kanji" id="quizKanji">一</div>
+      <p class="quiz-q-hint">이 한자에 맞는 <strong>뜻·음</strong>을 고르세요.</p>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-actions">
+        <button type="button" class="btn" id="quizQuit">그만하기</button>
+      </div>
+    </div>
+
+    <div id="quizResult" class="quiz-panel" hidden>
+      <h2>세트 결과</h2>
+      <div class="result-score" id="quizResultScore">8 / 10</div>
+      <p class="result-detail" id="quizResultPct">정답률 80%</p>
+      <div id="quizWrongWrap" class="wrong-review-wrap" hidden>
+        <h3 class="wrong-review-title">틀린 문제 · 복습</h3>
+        <div id="quizWrongList" class="wrong-review-list"></div>
+      </div>
+      <div class="quiz-actions">
+        <button type="button" class="btn primary" id="quizAgain">다시 풀기</button>
+        <button type="button" class="btn" id="quizToSetup">설정으로</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewWritten" class="view" hidden aria-labelledby="tabWritten">
+    <div id="writtenSetup" class="quiz-panel">
+      <h2>주관식 설정</h2>
+      <div class="quiz-field">
+        <label for="writtenCount">한 세트 문제 수</label>
+        <select id="writtenCount" class="quiz-select"></select>
+      </div>
+      <p style="margin:0 0 14px;font-size:0.78rem;color:var(--muted);text-align:center;line-height:1.5;">
+        한자가 보이면 <strong>뜻</strong>과 <strong>음</strong> 칸에 입력한 뒤 <strong>책점</strong>합니다.<br />
+        문제 순서는 세트마다 무작위입니다. (정답은 뜻·음과 비교·여러 뜻·<code>|</code> 허용)
+      </p>
+      <div class="quiz-actions" style="margin-top:0;">
+        <button type="button" class="btn primary" id="writtenStart" style="min-width:160px;">시작</button>
+      </div>
+    </div>
+
+    <div id="writtenPlay" class="quiz-panel" hidden>
+      <div class="quiz-progress" id="writtenProgress">1 / 10</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="badge" id="writtenLevelBadge">N5</span>
+        <span class="index-num" id="writtenIdNum">001</span>
+      </div>
+      <div class="quiz-q-kanji" id="writtenKanji">一</div>
+      <p class="quiz-q-hint">뜻과 음을 입력하세요</p>
+      <div class="quiz-field" style="margin-bottom:12px;">
+        <label for="writtenMean">뜻 (한글)</label>
+        <input type="text" id="writtenMean" class="written-inp" autocomplete="off" spellcheck="false" enterkeyhint="next" />
+      </div>
+      <div class="quiz-field" style="margin-bottom:8px;">
+        <label for="writtenRead">음 (훈독)</label>
+        <input type="text" id="writtenRead" class="written-inp" autocomplete="off" spellcheck="false" enterkeyhint="go" />
+      </div>
+      <div id="writtenFeedback" class="written-feedback" hidden></div>
+      <div class="quiz-actions">
+        <button type="button" class="btn primary" id="writtenSubmit">채점</button>
+        <button type="button" class="btn" id="writtenNext" hidden>다음</button>
+        <button type="button" class="btn" id="writtenQuit">그만하기</button>
+      </div>
+    </div>
+
+    <div id="writtenResult" class="quiz-panel" hidden>
+      <h2>세트 결과</h2>
+      <div class="result-score" id="writtenResultScore">0 / 10</div>
+      <p class="result-detail" id="writtenResultPct">정답률 0%</p>
+      <div id="writtenWrongWrap" class="wrong-review-wrap" hidden>
+        <h3 class="wrong-review-title">틀린 문제 · 복습</h3>
+        <div id="writtenWrongList" class="wrong-review-list"></div>
+      </div>
+      <div class="quiz-actions">
+        <button type="button" class="btn primary" id="writtenAgain">다시 풀기</button>
+        <button type="button" class="btn" id="writtenToSetup">설정으로</button>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <div id="shellVocab" class="shell-sub" hidden>
+    <section id="viewVocabCards" class="view" aria-label="단어 플래시카드">
+      <div class="toolbar">
+        <button type="button" class="btn" id="vocabShuffle">섞기</button>
+        <select id="vocabPoolSelect" class="pool-select" aria-label="단어 범위">
+          <option value="all">전체</option>
+          <option value="legacy">기존</option>
+          <option value="new">신규</option>
+        </select>
+        <span class="progress" id="vocabProgress">1 / 100</span>
+      </div>
+      <div class="scene">
+        <div class="card" id="vocabCard" tabindex="0" role="button" aria-label="단어 카드, 눌러 뒤집기?">
+          <div class="card-inner">
+            <div class="card-face front">
+              <span class="badge n5" id="vocabBadgeFront">N5 단어</span>
+              <span class="index-num" id="vocabIdxFront">1</span>
+              <div class="word" id="vocabWordFront">会う</div>
+              <div class="front-reading" id="vocabReadFront" lang="ja">あう</div>
+              <span class="hint">누러 한국어 뜻·뒤 보기</span>
+            </div>
+            <div class="card-face back">
+              <span class="badge n5" id="vocabBadgeBack">N5 단어</span>
+              <span class="index-num" id="vocabIdxBack">1</span>
+              <div class="back-reading" id="vocabReadBack"></div>
+              <div class="back-meaning" id="vocabMeanBack"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button type="button" class="btn" id="vocabPrev">이전</button>
+        <button type="button" class="btn primary" id="vocabFlip">뒤집기</button>
+        <button type="button" class="btn" id="vocabNext">다음</button>
+      </div>
+    </section>
+
+    <section id="viewVocabList" class="view" hidden aria-label="기본 단어 목록">
+      <div class="vocab-list-wrap">
+        <div class="vocab-list-toolbar">
+          <span class="badge n5" id="vocabListBadge">N5 · 기존</span>
+          <span class="progress" id="vocabListProgress">0개</span>
+          <button type="button" class="btn" id="vocabListReset">모두 숨기기</button>
+        </div>
+        <p class="vocab-list-caption" id="vocabListCaption">
+          오른쪽 뜻은 처음에 가려져 있습니다. <strong>단어 행을 누르면</strong> 읽기와 뜻이 보입니다.
+        </p>
+        <div id="vocabListScroll" class="vocab-list" role="list"></div>
+      </div>
+    </section>
+
+    <section id="viewVocabQuiz" class="view" hidden aria-label="단어 객관식?�즈">
+      <div id="vocabQuizSetup" class="quiz-panel">
+        <h2>단어 퀴즈 설정</h2>
+        <div class="quiz-field" style="margin-bottom:12px;">
+          <label for="vocabPoolSelectQuiz">단어 범위</label>
+          <select id="vocabPoolSelectQuiz" class="quiz-select pool-select" aria-label="단어 범위">
+            <option value="all">전체</option>
+            <option value="legacy">기존</option>
+            <option value="new">신규</option>
+          </select>
+        </div>
+        <div class="mode-bar seg" role="tablist" aria-label="단어 퀴즈 유형">
+          <button type="button" role="tab" id="vocabQuizKindMean" class="active" aria-selected="true">뜻 (한국어)</button>
+          <button type="button" role="tab" id="vocabQuizKindRead" aria-selected="false">음 (읽기)</button>
+        </div>
+        <div class="quiz-field">
+          <label for="vocabQuizCount">한 세트 문제 수</label>
+          <select id="vocabQuizCount" class="quiz-select"></select>
+        </div>
+        <p id="vocabQuizSetupHelp" style="margin:0 0 14px;font-size:0.78rem;color:var(--muted);text-align:center;line-height:1.5;">
+          위에 보이는<strong>일본어 읽기</strong>에 맞는 <strong>한국어 뜻</strong>과?고르세요.<br />
+          문제 순서와 보기 순서는 세트마다 무작위입니다. (보기 4개· · 현재 급수 풀 기준)
+        </p>
+        <div class="quiz-actions" style="margin-top:0;">
+          <button type="button" class="btn primary" id="vocabQuizStart" style="min-width:160px;">퀴즈 시작</button>
+        </div>
+      </div>
+
+      <div id="vocabQuizPlay" class="quiz-panel" hidden tabindex="-1">
+        <div class="quiz-progress" id="vocabQuizProgress">1 / 10</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="badge n5" id="vocabQuizLevelBadge">N5 단어</span>
+          <span class="index-num" id="vocabQuizIdNum">001</span>
+        </div>
+        <div class="quiz-q-word" id="vocabQuizWord">会う</div>
+        <p class="quiz-q-hint" id="vocabQuizPlayHint">이 읽기에 맞는 <strong>한국어 뜻</strong>을 고르세요.</p>
+        <div class="quiz-options" id="vocabQuizOptions"></div>
+        <div class="quiz-actions">
+          <button type="button" class="btn" id="vocabQuizQuit">그만하기</button>
+        </div>
+      </div>
+
+      <div id="vocabQuizResult" class="quiz-panel" hidden>
+        <h2>세트 결과</h2>
+        <div class="result-score" id="vocabQuizResultScore">8 / 10</div>
+        <p class="result-detail" id="vocabQuizResultPct">정답률 80%</p>
+        <div id="vocabQuizWrongWrap" class="wrong-review-wrap" hidden>
+          <h3 class="wrong-review-title">틀린 문제 · 복습</h3>
+          <div id="vocabQuizWrongList" class="wrong-review-list"></div>
+        </div>
+        <div class="quiz-actions">
+          <button type="button" class="btn primary" id="vocabQuizAgain">다시 풀기</button>
+          <button type="button" class="btn" id="vocabQuizToSetup">설정으로</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+
+  <div id="shellHira" class="shell" hidden>
+    <div class="mode-bar seg" role="tablist" aria-label="히라가나학습 ?�태">
+      <button type="button" role="tab" id="tabHiraCards" class="active" aria-selected="true">플래시카드</button>
+      <button type="button" role="tab" id="tabHiraChart" aria-selected="false">표</button>
+      <button type="button" role="tab" id="tabHiraQuiz" aria-selected="false">객관식</button>
+    </div>
+
+    <section id="viewHiraChart" class="view" hidden aria-label="히라가나??">
+      <div class="hira-chart-wrap">
+        <p class="hira-chart-caption">清音 46자· <strong>칸을 누르면</strong> 뒤집어 로마자·행 이름을 보입니다.</p>
+        <div id="hiraChartGrid" class="hira-chart-grid-root" role="grid" aria-label="五十音図"></div>
+        <div class="hira-chart-toolbar">
+          <button type="button" class="btn" id="hiraChartResetFlip">모두 앞면</button>
+        </div>
+      </div>
+    </section>
+    <section id="viewHiraCards" class="view" aria-label="히라가나 플래시카드">
+      <div class="toolbar">
+        <button type="button" class="btn" id="hiraShuffle">섞기</button>
+        <span class="progress" id="hiraProgress">1 / 46</span>
+      </div>
+      <div class="scene">
+        <div class="card" id="hiraCard" tabindex="0" role="button" aria-label="히라가나카드, 눌러 뒤집기?">
+          <div class="card-inner">
+            <div class="card-face front">
+              <span class="badge hira" id="hiraBadgeFront">히라가나</span>
+              <span class="index-num" id="hiraIdxFront">1</span>
+              <span class="hira-char" id="hiraKanaFront">あ</span>
+              <span class="hint">여러 읽기·행 안내 보기</span>
+            </div>
+            <div class="card-face back">
+              <span class="badge hira" id="hiraBadgeBack">히라가나</span>
+              <span class="index-num" id="hiraIdxBack">1</span>
+              <div class="back-reading" id="hiraRomajiBack"></div>
+              <div class="back-meaning" id="hiraRowBack"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button type="button" class="btn" id="hiraPrev">이전</button>
+        <button type="button" class="btn primary" id="hiraFlip">뒤집기</button>
+        <button type="button" class="btn" id="hiraNext">다음</button>
+      </div>
+    </section>
+
+    <section id="viewHiraQuiz" class="view" hidden aria-label="히라가나 객관식">
+      <div id="hiraQuizSetup" class="quiz-panel">
+        <h2>히라가나 퀴즈 설정</h2>
+        <div class="quiz-field">
+          <label for="hiraQuizCount">한 세트 문제 수</label>
+          <select id="hiraQuizCount" class="quiz-select"></select>
+        </div>
+        <p style="margin:0 0 14px;font-size:0.78rem;color:var(--muted);text-align:center;line-height:1.5;">
+          <strong>히라가나 한 글자</strong>에 맞는 <strong>로마자</strong>를고르세요.<br />
+          (清音 46자· 보기 4개· 순서 무작위)
+        </p>
+        <div class="quiz-actions" style="margin-top:0;">
+          <button type="button" class="btn primary" id="hiraQuizStart" style="min-width:160px;">퀴즈 시작</button>
+        </div>
+      </div>
+
+      <div id="hiraQuizPlay" class="quiz-panel" hidden tabindex="-1">
+        <div class="quiz-progress" id="hiraQuizProgress">1 / 10</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="badge hira" id="hiraQuizBadge">히라가나</span>
+          <span class="index-num" id="hiraQuizIdNum">01</span>
+        </div>
+        <div class="quiz-q-kanji hira-quiz-kana" id="hiraQuizKana">?</div>
+        <p class="quiz-q-hint">??�?�의 <strong>로마??섞기</strong>�?고르세요.</p>
+        <div class="quiz-options" id="hiraQuizOptions"></div>
+        <div class="quiz-actions">
+          <button type="button" class="btn" id="hiraQuizQuit">그만하기</button>
+        </div>
+      </div>
+
+      <div id="hiraQuizResult" class="quiz-panel" hidden>
+        <h2>세트 결과</h2>
+        <div class="result-score" id="hiraQuizResultScore">8 / 10</div>
+        <p class="result-detail" id="hiraQuizResultPct">정답률 80%</p>
+        <div id="hiraQuizWrongWrap" class="wrong-review-wrap" hidden>
+          <h3 class="wrong-review-title">틀린 문제 · 복습</h3>
+          <div id="hiraQuizWrongList" class="wrong-review-list"></div>
+        </div>
+        <div class="quiz-actions">
+          <button type="button" class="btn primary" id="hiraQuizAgain">다시 풀기</button>
+          <button type="button" class="btn" id="hiraQuizToSetup">설정으로</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const RAW = `001	山	메 산
+002	川	내 천
+003	田	밭 전
+004	日	날 일
+005	月	달 월
+006	火	불 화
+007	水	물 수
+008	木	나무 목
+009	金	쇠 금 | 성(姓) 김
+010	土	흙 토
+011	一	한 일
+012	二	두 이
+013	三	석 삼
+014	四	넉 사
+015	五	다섯 오
+016	六	여섯 륙
+017	七	일곱 칠
+018	八	여덟 팔
+019	九	아홉 구
+020	十	열 십
+021	百	일백 백
+022	千	일천 천
+023	万	일만 만
+024	円	둥글 원 | 화폐단위 엔
+025	年	해 년
+026	上	윗 상
+027	下	아래 하
+028	中	가운데 중
+029	半	반(半) 반
+030	分	나눌 분
+031	人	사람 인
+032	子	아들 자
+033	女	계집 녀
+034	男	사내 남
+035	目	눈 목
+036	口	입 구
+037	耳	귀 이
+038	手	손 수
+039	足	발 족
+040	力	힘 력
+041	父	아비 부
+042	母	어미 모
+043	先	먼저 선
+044	生	날 생
+045	学	배울 학
+046	校	학교 교
+047	友	벗 우
+048	本	근본 본
+049	毎	매양 매
+050	何	어찌 하
+051	前	앞 전
+052	後	뒤 후
+053	外	바깥 외
+054	左	왼 좌
+055	右	오를/오른(쪽) 우
+056	東	동녘 동
+057	西	서녘 서
+058	南	남녘 남
+059	北	북녘 북 | 달아날 배
+060	名	이름 명
+061	牛	소 우
+062	馬	말 마
+063	魚	고기/물고기 어
+064	貝	조개 패
+065	雨	비 우
+066	天	하늘 천
+067	気	기운 기
+068	車	수레 거 | 수레 차
+069	門	문 문
+070	午	낮 오
+071	大	큰 대
+072	小	작을 소
+073	高	높을 고
+074	安	편안 안
+075	新	새 신
+076	古	옛 고
+077	長	긴 장
+078	多	많을 다
+079	少	적을 소
+080	早	이를 조
+081	行	다닐 행 | 항렬 항
+082	来	올 래
+083	食	밥/먹을 식
+084	見	볼 견 | 뵈올 현
+085	入	들 입
+086	出	날 출
+087	立	설 립
+088	書	글 서
+089	言	말씀 언
+090	飲	마실 음
+091	話	말씀 화
+092	読	읽을 독 | 구절 두
+093	語	말씀 어
+094	間	사이 간
+095	聞	들을 문
+096	買	살 매
+097	休	쉴 휴
+098	時	때 시
+099	週	주일 주
+100	道	길 도
+101	今	이제 금
+102	会	모일 회
+103	社	모일 사
+104	店	가게 점
+105	駅	역 역
+106	花	꽃 화
+107	国	나라 국
+108	白	흰 백
+109	空	빌 공
+110	電	번개 전
+111	々	여러 (いろいろ)
+112	丈	키 (たけ)
+113	丸	둥글다 (まるい)
+114	乳	젖 (ちち)
+115	予	예정 (よてい)
+116	他	다른 (ほか)
+117	供	아이 (こども)
+118	傘	우산 (かさ)
+119	優	우 (ゆう)
+120	公	공적인 (おおやけ)
+121	危	위험하다 (あぶない)
+122	卵	알 (たまご)
+123	吸	吸 (すう)
+124	呂	목욕 (おふろ)
+125	呼	부르다 (よぶ)
+126	咲	咲 (さく)
+127	喫	찻집 (きっさてん)
+128	困	곤란하다 (こまる)
+129	園	공원 (こうえん)
+130	塩	소금 (しお)
+131	夫	남편 (おっと)
+132	奥	깊숙한 (おく)
+133	婚	결혼 (けっこん)
+134	嫌	싫은 (いやな)
+135	定	예정 (よてい)
+136	宿	묵는 (やど)
+137	寝	자다 (ねる)
+138	局	우체국 (ゆうびんきょく)
+139	布	천 (ぬの)
+140	帽	모자 (ぼうし)
+141	座	앉다 (すわる)
+142	庭	정원 (にわ)
+143	徒	徒 (せいと)
+144	御	밥 (ごはん)
+145	忙	바쁘다 (いそがしい)
+146	押	밀다 (おす)
+147	撮	撮 (とる)
+148	散	산책 (さんぽ)
+149	易	쉽다 (やさしい)
+150	昨	어제 (きのう)
+151	暇	한가한 (ひまな)
+152	曲	구부러지다 (まがる)
+153	机	책상 (つくえ)
+154	枚	장 (まい)
+155	果	과일 (くだもの)
+156	椅	의자 (いす)
+157	横	옆 (よこ)
+158	機	비행기 (ひこうき)
+159	次	다음 (つぎ)
+160	欲	욕심 (よく)
+161	歳	살 (さい)
+162	段	점점 (だんだん)
+163	汚	더럽다 (きたない)
+164	泳	헤엄치다 (およぐ)
+165	浴	뒤집어쓰다 (あびる)
+166	消	꺼지다 (きえる)
+167	狭	좁다 (せまい)
+168	猫	고양이 (ねこ)
+169	瓶	병 (びん)
+170	甘	달다 (あまい)
+171	留	유학생 (りゅうがくせい)
+172	番	순서 (ばん)
+173	痛	아프다 (いたい)
+174	登	登 (のぼる)
+175	皆	여러분 (みなさん)
+176	眼	안경 (めがね)
+177	砂	모래 (すな)
+178	磨	닦다 (みがく)
+179	窓	창 (まど)
+180	符	표 (きっぷ)
+181	筆	붓 (ふで)
+182	糖	설탕 (さとう)
+183	紅	홍차 (こうちゃ)
+184	結	결혼 (けっこん)
+185	絵	그림 (え)
+186	緑	녹색 (みどり)
+187	締	締 (しめる)
+188	置	두다 (おく)
+189	背	키 (せ)
+190	腹	배 (はら)
+191	菓	과자 (おかし)
+192	葉	잎 (は)
+193	要	要 (いる)
+194	覚	외우다 (おぼえる)
+195	角	모난 (かど)
+196	誌	잡지 (ざっし)
+197	誕	생일 (たんじょうび)
+198	誰	누구 (だれ)
+199	豚	돼지고기 (ぶたにく)
+200	財	재 (ざい)
+201	辛	맵다 (からい)
+202	辞	사전 (じしょ)
+203	遅	늦다 (おそい)
+204	遊	놀다 (あそぶ)
+205	達	친구 (ともだち)
+206	邪	감기 (かぜ)
+207	部	방 (へや)
+208	郵	우체국 (ゆうびんきょく)
+209	酒	술 (おさけ)
+210	鉄	철 (てつ)
+211	鉛	납 (なまり)
+212	鍵	열쇠 (かぎ)
+213	鏡	거울 (かがみ)
+214	階	계단 (かいだん)
+215	隣	이웃 (となり)
+216	雑	잡지 (ざっし)
+217	難	어렵다 (むずかしい)
+218	静	조용한 (しずかな)
+219	靴	신발 (くつ)
+220	鞄	가방 (かばん)
+221	頃	경 (ころ)
+222	飛	날다 (とぶ)
+223	黄	노랗다 (きいろい)
+224	鼻	코 (はな)
+225	住	살 주
+226	所	바 소
+227	京	서울 경
+228	都	도읍 도
+229	府	마을[官廳] 부
+230	県	고을 현
+231	市	저자 시
+232	区	구분할/지경 구
+233	町	밭두둑 정
+234	村	마을 촌
+235	明	밝을 명
+236	暗	어두울 암
+237	遠	멀 원
+238	近	가까울 근
+239	強	강할 강
+240	弱	약할 약
+241	重	무거울 중
+242	軽	가벼울 경
+243	太	클 태
+244	細	가늘 세
+245	特	특별할 특
+246	別	다를/나눌 별
+247	有	있을 유
+248	便	편할 편 | 똥오줌 변
+249	利	이할 리
+250	不	아닐 불
+251	切	끊을 절 | 온통 체
+252	元	으뜸 원
+253	好	좋을 호
+254	急	급할 급
+255	低	낮을 저
+256	広	넓을 광
+257	短	짧을 단
+258	良	어질 량
+259	悪	악할 악 | 미워할 오
+260	正	바를 정
+261	変	변할 변
+262	赤	붉을 적
+263	青	푸를 청
+264	黒	검을 흑
+265	映	비칠 영
+266	画	그림 화 | 그을 획(劃)
+267	音	소리 음
+268	楽	즐길 락 | 노래 악 | 좋아할 요
+269	歌	노래 가
+270	写	베낄 사
+271	真	참 진
+272	旅	나그네 려
+273	世	인간 세
+274	界	지경 계
+275	仕	섬길 사
+276	事	일 사
+277	銀	은 은
+278	員	인원 원
+279	医	의원 의
+280	者	놈 자
+281	働	일할 동
+282	屋	집 옥
+283	産	낳을 산
+284	業	업 업
+285	林	수풀 림
+286	森	수풀 삼
+287	地	따 지
+288	池	못 지
+289	海	바다 해
+290	洋	큰바다 양
+291	雪	눈 설
+292	光	빛 광
+293	台	대 대 | 태풍 태
+294	風	바람 풍
+295	季	계절 계
+296	節	마디 절
+297	春	봄 춘
+298	夏	여름 하
+299	秋	가을 추
+300	冬	겨울 동
+301	暑	더울 서
+302	寒	찰 한
+303	暖	따뜻할 난
+304	涼	서늘할 량
+305	体	몸 체
+306	頭	머리 두
+307	顔	낯 안
+308	首	머리 수
+309	心	마음 심
+310	声	소리 성
+311	病	병 병
+312	薬	약 약
+313	科	과목 과
+314	内	안 내
+315	朝	아침 조
+316	昼	낮 주
+317	夜	밤 야
+318	夕	저녁 석
+319	方	모[稜] 방
+320	晩	늦을 만
+321	計	셀 계
+322	曜	빛날 요
+323	以	써 이
+324	度	법도 도 | 헤아릴 탁
+325	止	그칠 지
+326	歩	걸음 보
+327	走	달릴 주
+328	起	일어날 기
+329	持	가질 지
+330	待	기다릴 대
+331	借	빌/빌릴 차
+332	貸	빌릴/꿔줄 대
+333	始	비로소 시
+334	終	마칠 종
+335	家	집 가
+336	族	겨레 족
+337	私	사사(私事) 사
+338	自	스스로 자
+339	親	친할 친
+340	両	두 량
+341	兄	형 형
+342	弟	아우 제
+343	姉	손윗누이 자
+344	妹	누이 매
+345	活	살 활
+346	回	돌아올 회
+347	主	임금/주인 주
+348	色	빛 색
+349	形	모양 형
+350	品	물건 품
+351	民	백성 민
+352	服	옷 복
+353	犬	개 견
+354	同	한가지 동
+355	米	쌀 미
+356	料	헤아릴 료
+357	理	다스릴 리
+358	肉	고기 육
+359	鳥	새 조
+360	野	들[坪] 야
+361	菜	나물 채
+362	茶	차 다 | 차 차
+363	飯	밥 반
+364	味	맛 미
+365	代	대신할 대
+366	使	하여금/부릴 사
+367	作	지을 작
+368	化	될 화
+369	信	믿을 신
+370	進	나아갈 진
+371	送	보낼 송
+372	返	돌이킬 반
+373	洗	씻을 세
+374	注	부을 주
+375	場	마당 장
+376	建	세울 건
+377	物	물건 물
+378	院	집 원
+379	館	집 관
+380	堂	집 당
+381	室	집 실
+382	工	장인 공
+383	図	그림 도
+384	号	이름 호
+385	交	사귈 교
+386	通	통할 통
+387	動	움직일 동
+388	乗	탈 승
+389	降	내릴 강 | 항복할 항
+390	運	옮길 운
+391	転	구를 전
+392	帰	돌아갈 귀
+393	発	필 발
+394	着	붙을 착
+395	漢	한수/한나라 한
+396	字	글자 자
+397	文	글월 문
+398	教	가르칠 교
+399	勉	힘쓸 면
+400	習	익힐 습
+401	英	꽃부리 영
+402	考	생각할 고
+403	研	갈 연
+404	究	연구할 구
+405	問	물을 문
+406	題	제목 제
+407	試	시험 시
+408	験	시험 험
+409	質	바탕 질
+410	合	합할 합
+411	答	대답 답
+412	用	쓸 용
+413	紙	종이 지
+414	意	뜻 의
+415	引	끌 인
+416	開	열 개
+417	閉	닫을 폐
+418	去	갈 거
+419	死	죽을 사
+420	集	모을 집
+421	知	알 지
+422	売	팔 매
+423	説	말씀 설 | 달랠 세
+424	思	생각 사
+425	丁	정중한 (ていねいな)
+426	並	한 (ならぶ)
+427	久	오래간만입니다 (おひさしぶりです)
+428	乾	마르다 (かわく)
+429	争	전쟁 (せんそう)
+430	亡	죽다 (なくなる)
+431	介	소개 (しょうかい)
+432	付	붙다 (つく)
+433	伝	전하다 (つたえる)
+434	伺	의 (うかがう)
+435	似	닮다 (にる)
+436	例	예 (れい)
+437	係	담당 (かかり)
+438	俺	남자의 (おれ)
+439	個	개인 (こじん)
+440	倍	배 (ばい)
+441	倒	쓰러뜨리다 (たおす)
+442	値	값어치 (あたい)
+443	側	쪽 (がわ)
+444	備	준비 (じゅんび)
+445	僕	남자의 (ぼく)
+446	億	억 (おく)
+447	全	전국 (ぜんこく)
+448	具	具 (ぐあい)
+449	典	사전 (じてん)
+450	冷	차갑다 (つめたい)
+451	列	열 (れつ)
+452	初	처음으로 (はじめて)
+453	則	규칙 (きそく)
+454	割	나누다 (わる)
+455	務	공무원 (こうむいん)
+456	勝	이기다 (かつ)
+457	勤	근무하다 (つとめる)
+458	勿	물론 (もちろん)
+459	匂	냄새 (におい)
+460	包	싸다 (つつむ)
+461	匹	마리 (ひき)
+462	卒	졸업 (そつぎょう)
+463	単	간단한 (かんたんな)
+464	厚	두껍다 (あつい)
+465	原	들 (はら)
+466	厳	엄하다 (きびしい)
+467	参	参 (まいる)
+468	反	반대 (はんたい)
+469	取	取 (とる)
+470	受	受 (うける)
+471	只	지금 (ただいま)
+472	召	의 (めしあがる)
+473	叱	야단치다 (しかる)
+474	史	역사 (れきし)
+475	向	맞은편 (むかい)
+476	君	자네 (きみ)
+477	吹	불다 (ふく)
+478	命	목숨 (いのち)
+479	喉	목구멍 (のど)
+480	喜	기뻐하다 (よろこぶ)
+481	喧	싸움 (けんか)
+482	営	영업 (えいぎょう)
+483	嘘	거짓말 (うそ)
+484	嘩	싸움 (けんか)
+485	因	원인 (げんいん)
+486	団	이부자리 (ふとん)
+487	坂	비탈길 (さか)
+488	坊	늦잠을 (ねぼう)
+489	堅	딱딱하다 (かたい)
+490	報	일기 (てんきよほう)
+491	塗	바르다 (ぬる)
+492	増	늘어나다 (ふえる)
+493	壁	벽 (かべ)
+494	壊	망가뜨리다 (こわす)
+495	夢	꿈 (ゆめ)
+496	失	실패 (しっぱい)
+497	妻	아내 (つま)
+498	娘	딸 (むすめ)
+499	存	의 (ぞんじる)
+500	孫	손자 (まご)
+501	宅	상대방 (おたく)
+502	守	지키다 (まもる)
+503	客	손님 (きゃく)
+504	寂	외롭다 (さびしい)
+505	寄	들르다 (よる)
+506	察	경찰 (けいさつ)
+507	寧	정중한 (ていねいな)
+508	寺	절 (てら)
+509	対	쌍 (つい)
+510	封	봉함 (ふう)
+511	専	전문 (せんもん)
+512	将	장래 (しょうらい)
+513	居	거실 (いま)
+514	届	닿다 (とどく)
+515	展	전람회 (てんらんかい)
+516	岸	물가 (きし)
+517	島	섬 (しま)
+518	差	차 (さ)
+519	席	자리 (せき)
+520	床	마루 (ゆか)
+521	庫	냉장고 (れいぞうこ)
+522	廊	복도 (ろうか)
+523	弁	도시락 (べんとう)
+524	張	열심히 (がんばる)
+525	弾	총알 (たま)
+526	当	도시락 (べんとう)
+527	役	역 (やく)
+528	彼	그이 (かれ)
+529	律	법률 (ほうりつ)
+530	復	복습 (ふくしゅう)
+531	必	반드시 (かならず)
+532	忘	잊다 (わすれる)
+533	念	생각 (ねん)
+534	怒	화내다 (おこる)
+535	怖	무섭다 (こわい)
+536	性	성 (せい)
+537	怪	상처 (けが)
+538	恥	부끄러움 (はじ)
+539	息	숨 (いき)
+540	悲	슬프다 (かなしい)
+541	慣	익숙해지다 (なれる)
+542	慮	사양 (えんりょ)
+543	懸	열심히 (いっしょうけんめい)
+544	成	찬성 (さんせい)
+545	我	나 (われ)
+546	戦	전쟁 (せんそう)
+547	戸	문짝 (と)
+548	戻	되돌리다 (もどす)
+549	房	냉방 (れいぼう)
+550	打	치다 (うつ)
+551	払	払 (はらう)
+552	技	기법 (わざ)
+553	投	던지다 (なげる)
+554	折	때 (おり)
+555	抵	대개 (たいてい)
+556	招	초대 (しょうたい)
+557	拝	의 (はいけんする)
+558	拾	줍다 (ひろう)
+559	指	손가락 (ゆび)
+560	捕	붙잡다 (つかまえる)
+561	捨	버리다 (すてる)
+562	掃	청소 (そうじ)
+563	授	수업 (じゅぎょう)
+564	掛	걸다 (かける)
+565	探	찾다 (さがす)
+566	換	갈아탐 (のりかえ)
+567	揺	흔들리다 (ゆれる)
+568	支	채비 (したく)
+569	放	방송 (ほうそう)
+570	政	정치 (せいじ)
+571	故	고장 (こしょう)
+572	敗	실패 (しっぱい)
+573	数	수 (かず)
+574	昔	옛날 (むかし)
+575	星	별 (ほし)
+576	是	꼭 (ぜひ)
+577	普	보통 (ふつう)
+578	景	경치 (けしき)
+579	晴	하늘이 (はれ)
+580	暮	暮 (くれる)
+581	曇	흐리다 (くもる)
+582	替	바꾸다 (とりかえる)
+583	最	최근 (さいきん)
+584	期	기간 (きかん)
+585	束	다발 (たば)
+586	杯	술잔 (さかずき)
+587	松	소나무 (まつ)
+588	枝	가지 (えだ)
+589	柔	부드럽다 (やわらかい)
+590	格	격 (かく)
+591	案	안 (あん)
+592	桜	벚나무 (さくら)
+593	梅	매화나무 (うめ)
+594	械	기계 (きかい)
+595	棒	몽둥이 (ぼう)
+596	棚	선반 (たな)
+597	植	심다 (うえる)
+598	構	거절할 (けっこうです)
+599	様	님 (さま)
+600	橋	다리 (はし)
+601	欠	결석 (けっせき)
+602	歯	이 (は)
+603	歴	역사 (れきし)
+604	残	남기다 (のこす)
+605	比	비교하다 (くらべる)
+606	毛	털 (け)
+607	氏	남자친구 (かれし)
+608	氷	얼음 (こおり)
+609	汗	땀 (あせ)
+610	決	정해지다 (きまる)
+611	汽	기차 (きしゃ)
+612	沸	沸 (わかす)
+613	油	기름 (あぶら)
+614	治	정치 (せいじ)
+615	泊	묵다 (とまる)
+616	法	법 (ほう)
+617	泣	울다 (なく)
+618	泥	진흙 (どろ)
+619	派	훌륭한 (りっぱな)
+620	流	흘리다 (ながす)
+621	浅	얕다 (あさい)
+622	深	깊다 (ふかい)
+623	済	경제 (けいざい)
+624	減	減 (へる)
+625	渡	건네주다 (わたす)
+626	港	항구 (みなと)
+627	湯	뜨거운 (おゆ)
+628	準	준비 (じゅんび)
+629	滑	미끄러지다 (すべる)
+630	漫	만화 (まんが)
+631	濡	젖다 (ぬれる)
+632	濯	세탁 (せんたく)
+633	点	점 (てん)
+634	無	없애다 (なくす)
+635	然	전혀 (ぜんぜん)
+636	焼	굽다 (やく)
+637	熱	열 (ねつ)
+638	爪	손톱 (つめ)
+639	片	치우다 (かたづける)
+640	玄	현관 (げんかん)
+641	珍	드물다 (めずらしい)
+642	由	자유 (じゆう)
+643	申	의 (もうす)
+644	畳	다다미 (たたみ)
+645	疲	지치다 (つかれる)
+646	盗	훔치다 (ぬすむ)
+647	盛	성행한 (さかんな)
+648	直	고치다 (なおす)
+649	相	상 (そう)
+650	眠	졸리다 (ねむい)
+651	石	돌 (いし)
+652	確	확실한 (たしかな)
+653	礼	예 (れい)
+654	祈	빌다 (いのる)
+655	祖	祖 (そふ)
+656	祝	축하하다 (いわう)
+657	神	신 (かみ)
+658	祭	축제 (おまつり)
+659	秒	초 (びょう)
+660	程	정도 (ほど)
+661	積	쌓이다 (つもる)
+662	章	문장 (ぶんしょう)
+663	竹	대나무 (たけ)
+664	笑	웃다 (わらう)
+665	等	등 (など)
+666	筒	통 (つつ)
+667	算	산수 (さんすう)
+668	箱	상자 (はこ)
+669	簡	간단한 (かんたんな)
+670	糸	실 (いと)
+671	約	약 (やく)
+672	素	만물이 (もと)
+673	紹	소개 (しょうかい)
+674	組	조 (くみ)
+675	経	경험 (けいけん)
+676	絡	연락 (れんらく)
+677	続	계속되다 (つづく)
+678	線	선 (せん)
+679	練	연습 (れんしゅう)
+680	縦	세로 (たて)
+681	美	아름답다 (うつくしい)
+682	義	강의 (こうぎ)
+683	羽	날개 (はね)
+684	老	노인 (ろうじん)
+685	肩	어깨 (かた)
+686	育	키우다 (そだてる)
+687	脱	벗다 (ぬぐ)
+688	腕	팔 (うで)
+689	致	의 (いたす)
+690	興	흥미 (きょうみ)
+691	舌	혀 (した)
+692	舎	시골 (いなか)
+693	船	배 (ふね)
+694	若	젊다 (わかい)
+695	苦	고생 (く)
+696	草	풀 (くさ)
+697	荷	짐 (に)
+698	萄	포도 (ぶどう)
+699	落	떨어지다 (おちる)
+700	葡	포도 (ぶどう)
+701	蔵	냉장고 (れいぞうこ)
+702	薄	얇다 (うすい)
+703	虫	벌레 (むし)
+704	血	피 (ち)
+705	術	기술 (ぎじゅつ)
+706	表	표면 (おもて)
+707	袋	자루 (ふくろ)
+708	裏	뒷면 (うら)
+709	製	제 (せい)
+710	複	복잡한 (ふくざつな)
+711	規	규칙 (きそく)
+712	覧	의 (ごらんになる)
+713	観	관광 (かんこう)
+714	触	만지다 (さわる)
+715	記	기자 (きしゃ)
+716	訪	찾아가다 (たずねる)
+717	訳	뜻 (わけ)
+718	調	알아보다 (しらべる)
+719	談	상담 (そうだん)
+720	論	물론 (もちろん)
+721	講	강의 (こうぎ)
+722	謝	사과하다 (あやまる)
+723	警	경찰 (けいさつ)
+724	議	회의 (かいぎ)
+725	負	지다 (まける)
+726	貿	무역 (ぼうえき)
+727	賛	찬성 (さんせい)
+728	贈	선물 (おくりもの)
+729	越	이사하다 (ひっこす)
+730	趣	재미 (おもむき)
+731	踊	춤 (おどり)
+732	踏	밟다 (ふむ)
+733	軒	처마 (のき)
+734	輪	고리 (わ)
+735	輸	수출 (ゆしゅつ)
+736	辺	근처 (へん)
+737	込	혼잡하다 (こむ)
+738	迎	맞이하다 (むかえる)
+739	退	퇴원 (たいいん)
+740	逃	도망치다 (にげる)
+741	途	도중 (とちゅう)
+742	連	데리고 (つれていく)
+743	過	지나다 (すぎる)
+744	違	다르다 (ちがう)
+745	選	고르다 (えらぶ)
+746	郊	교외 (こうがい)
+747	配	걱정 (しんぱい)
+748	酔	취함 (よい)
+749	醬	간장 (しょうゆ)
+750	釣	낚다 (つる)
+751	関	관계 (かんけい)
+752	除	청소 (そうじ)
+753	険	위험한 (きけんな)
+754	際	때 (さい)
+755	障	고장 (こしょう)
+756	雲	구름 (くも)
+757	零	영 (れい)
+758	震	지진 (じしん)
+759	非	꼭 (ぜひ)
+760	面	면 (めん)
+761	頂	정상 (いただき)
+762	頑	열심히 (がんばる)
+763	頼	부탁하다 (たのむ)
+764	願	원하다 (ねがう)
+765	飴	엿 (あめ)
+766	飼	飼 (かう)
+767	飾	꾸밈 (かざり)
+768	馳	손님을 (ごちそう)
+769	駐	주차 (ちゅうしゃ)
+770	騒	떠들다 (さわぐ)
+771	驚	놀라다 (おどろく)
+772	骨	뼈 (ほね)
+773	髪	머리카락 (かみ)
+774	魔	남의 (おじゃまします)
+775	鳴	鳴 (なく)`;
+
+    function parseRaw(text) {
+      const rows = [];
+      for (const line of text.trim().split("\n")) {
+        const parts = line.split("\t");
+        if (parts.length < 3) continue;
+        const id = parseInt(parts[0], 10);
+        const kanji = parts[1];
+        const meaning = parts.slice(2).join("\t");
+        rows.push({
+          id,
+          kanji,
+          meaning,
+          level: id <= 110 ? "N5" : "N4",
+        });
+      }
+      return rows;
+    }
+
+    const ALL = parseRaw(RAW);
+
+    const VOCAB_RAW = `1	間	あいだ	사이. 동안
+2	会う	あう	(-に+) 만나다
+3	青い	あおい	푸르다. 파랗다
+4	赤い	あかい	붉다. 빨갛다
+5	明るい	あかるい	밝다. 환하다. 명랑하다
+6	秋	あき	가을
+7	開く	あく	열리다
+8	開ける	あける	열다
+9	朝	あさ	아침
+10	朝御飯	あさごはん	아침 식사
+11	あさって	あさって	모레
+12	足	あし	발. 다리
+13	明日	あした	내일
+14	あそこ	あそこ	저기
+15	遊ぶ	あそぶ	놀다
+16	暖かい	あたたかい	따뜻하다
+17	頭	あたま	머리
+18	新しい	あたらしい	새롭다
+19	あちら	あちら	저쪽
+20	暑い	あつい	덥다
+21	後	あと	(시간적으로)후. 나중
+22	あなた	あなた	당신
+23	兄	あに	(나의)형. 오빠
+24	姉	あね	(나의)누나. 언니
+25	あの	あの	저
+26	アパート	アパート	아파트
+27	浴びる	あびる	뒤집어쓰다. (샤워를) 하다
+28	危ない	あぶない	위험하다
+29	甘い	あまい	달다. 달콤하다
+30	あまり	あまり	별로. 그다지(+부정문)
+31	雨	あめ	비
+32	洗う	あらう	씻다
+33	ありがとうございます	ありがとうございます	감사합니다
+34	ある	ある	있다
+35	歩く	あるく	걷다
+36	あれ	あれ	저것
+37	あんな	あんな	저런
+38	いい	いい	좋다
+39	いいえ	いいえ	아니오
+40	言う	いう/ゆう	말하다
+41	家	いえ	집
+42	行く	いく	가다
+43	いくつ	いくつ	몇. 몇개. 몇살
+44	いくら	いくら	얼마
+45	医者	いしゃ	의사
+46	椅子	いす	의자
+47	忙しい	いそがしい	바쁘다
+48	痛い	いたい	아프다
+49	いただきます	いただきます	잘 먹겠습니다
+50	一	いち	일. 하나
+51	一日	いちにち	하루 (기간)
+52	一番	いちばん	일번. 첫째. 가장. 제일
+53	いつ	いつ	언제
+54	五日	いつか	5일
+55	一週間	いっしゅうかん	일주일
+56	いっしょに	いっしょに	같이. 함께
+57	五つ	いつつ	다섯 개
+58	いつも	いつも	언제나.늘
+59	犬	いぬ	개
+60	今	いま	지금
+61	意味	いみ	의미. 뜻
+62	妹	いもうと	여동생
+63	嫌な	いやな	싫은
+64	いらっしゃいませ	いらっしゃいませ	어서 오십시오
+65	入口	いりぐち	입구
+66	いる	いる	(사람이나 동물이) 있다
+67	要る	いる	(1G) 필요하다
+68	入れる	いれる	넣다
+69	色	いろ	색
+70	色々	いろいろ	여러 가지로
+71	色々な	いろいろな	여러가지의
+72	上	うえ	위
+73	後ろ	うしろ	뒤. 뒤쪽
+74	歌	うた	노래
+75	歌う	うたう	노래 부르다
+76	うどん	うどん	우동
+77	生まれる	うまれる	태어나다
+78	海	うみ	바다
+79	売る	うる	팔다
+80	うるさい	うるさい	시끄럽다
+81	上着	うわぎ	겉옷. 내복 위에 입는 옷
+82	絵	え	그림
+83	英語	えいご	영어
+84	駅	えき	역
+85	エレベーター	エレベーター	엘리베이터. 승강기
+86	-円	えん	엔(일본 화폐 단위)
+87	鉛筆	えんぴつ	연필
+88	おいしい	おいしい	맛있다
+89	多い	おおい	많다
+90	大きい	おおきい	크다
+91	お母さん	おかあさん	어머니
+92	お菓子	おかし	과자
+93	お金	おかね	돈
+94	起きる	おきる	일어나다
+95	置く	おく	두다. 놓다
+96	奥さん	おくさん	부인. 아주머니
+97	お酒	おさけ	술
+98	おじいさん	おじいさん	할아버지
+99	教える	おしえる	가르치다
+100	おじさん	おじさん	아저씨
+101	押す	おす	밀다. 누르다
+102	遅い	おそい	늦다. 느리다
+103	お茶	おちゃ	차
+104	お父さん	おとうさん	아버지
+105	弟	おとうと	남동생
+106	男	おとこ	남자
+107	男の子	おとこのこ	남자 아이
+108	おととい	おととい	그저께
+109	おととし	おととし	재작년
+110	大人	おとな	어른
+111	お腹	おなか	배
+112	同じ	おなじ	같은. 동일한
+113	お兄さん	おにいさん	형. 오빠
+114	お姉さん	おねえさん	누나. 언니
+115	おねがいします	おねがいします	부탁합니다
+116	おばあさん	おばあさん	할머니
+117	おばさん	おばさん	아주머니
+118	おはようございます	おはようございます	안녕하세요(아침인사)
+119	お風呂	おふろ	목욕. 목욕탕
+120	覚える	おぼえる	외우다. 기억하다
+121	重い	おもい	무겁다
+122	思う	おもう	생각하다. 헤아리다. 느끼다
+123	おもしろい	おもしろい	재미있다. 우습다
+124	おやすみなさい	おやすみなさい	안녕히 주무세요
+125	泳ぐ	およぐ	헤엄치다. 수영을 하다
+126	降りる	おりる	(차에서) 내리다
+127	終わる	おわる	끝나다. 마치다
+128	音楽	おんがく	음악
+129	女	おんな	여자
+130	女の子	おんなのこ	여자 아이
+131	外国	がいこく	외국
+132	会社	かいしゃ	회사
+133	階段	かいだん	계단
+134	買い物	かいもの	물건을 삼. 쇼핑. 장보기
+135	買う	かう	사다. 구입하다
+136	返す	かえす	돌려주다
+137	帰る	かえる	(1G) 돌아가다. 돌아오다
+138	顔	かお	얼굴
+139	かかる	かかる	(시간이) 걸리다. (돈이) 들다
+140	鍵	かぎ	열쇠
+141	書く	かく	쓰다. 적다
+142	学生	がくせい	학생. (특히 대학생)
+143	-か月	かげつ	-개월
+144	かける	かける	(안경을) 쓰다. 끼다
+145	傘	かさ	우산
+146	貸す	かす	빌려주다
+147	風	かぜ	바람
+148	風邪	かぜ	감기
+149	家族	かぞく	가족
+150	-月	がつ	-월
+151	学校	がっこう	학교
+152	角	かど	모난 귀퉁이. 구석. 길모퉁이
+153	鞄	かばん	가방
+154	花瓶	かびん	화병. 꽃병
+155	かぶる	かぶる	(모자를) 쓰다
+156	紙	かみ	종이
+157	カメラ	カメラ	카메라
+158	火曜日	かようび	화요일
+159	辛い	からい	맵다
+160	体	からだ	몸
+161	借りる	かりる	빌리다. 꾸다
+162	軽い	かるい	가볍다
+163	カレンダー	カレンダー	달력
+164	川	かわ	강
+165	かわいい	かわいい	귀엽다
+166	-間	かん	-간
+167	漢字	かんじ	한자
+168	木	き	나무
+169	黄色い	きいろい	노랗다
+170	消える	きえる	꺼지다. 사라지다. 지워지다
+171	聞く	きく	듣다. 물어보다
+172	北	きた	북쪽
+173	ギター	ギター	기타
+174	汚い	きたない	더럽다
+175	喫茶店	きっさてん	찻집. 다방
+176	切手	きって	우표
+177	切符	きっぷ	표
+178	昨日	きのう	어제
+179	九	きゅう	구. 아홉
+180	牛肉	ぎゅうにく	쇠고기
+181	牛乳	ぎゅうにゅう	우유
+182	今日	きょう	오늘
+183	教室	きょうしつ	교실
+184	兄弟	きょうだい	형제
+185	去年	きょねん	작년
+186	嫌いな	きらいな	싫어하는
+187	着る	きる	입다
+188	きれいな	きれいな	예쁜. 깨끗한
+189	銀行	ぎんこう	은행
+190	金曜日	きんようび	화요일
+191	薬	くすり	약
+192	果物	くだもの	과일
+193	口	くち	입
+194	靴	くつ	신발. 구두
+195	靴下	くつした	양말
+196	国	くに	나라
+197	くらい/ぐらい	くらい/ぐらい	-정도. -만큼
+198	暗い	くらい	어둡다
+199	クラス	クラス	클래스. 반. 학급
+200	来る	くる	오다
+201	車	くるま	수레의 총칭. 차
+202	黒い	くろい	검다. 까맣다
+203	今朝	けさ	오늘 아침
+204	消す	けす	끄다. 지우다
+205	結婚	けっこん	결혼
+206	月曜日	げつようび	화요일
+207	元気な	げんきな	건강한. 잘 있는
+208	五	ご	오. 다섯
+209	-語	ご	-어(언어)
+210	公園	こうえん	공원
+211	紅茶	こうちゃ	홍차
+212	交番	こうばん	파출소
+213	声	こえ	소리
+214	コート	コート	코트
+215	コーヒー	コーヒー	커피
+216	ここ	ここ	여기
+217	午後	ごご	오후
+218	九日	ここのか	9일
+219	九つ	ここのつ	아홉 개
+220	午前	ごぜん	오전
+221	答える	こたえる	대답하다
+222	ごちそうさまでした	ごちそうさまでした	잘 먹었습니다
+223	こちら	こちら	이쪽
+224	コップ	コップ	컵
+225	今年	ことし	올해
+226	子供	こども	아이. 자식
+227	この	この	이
+228	御飯	ごはん	밥
+229	コピー	コピー	복사
+230	困る	こまる	곤란하다
+231	これ	これ	이것
+232	-頃	ごろ	-경. -쯤
+233	今月	こんげつ	이번달
+234	今週	こんしゅう	이번주
+235	こんな	こんな	이런
+236	こんにちは	こんにちは	안녕하세요(낮인사)
+237	今晩	こんばん	오늘 밤
+238	こんばんは	こんばんは	안녕하세요(저녁인사)
+239	-歳	さい	-살. -세
+240	財布	さいふ	지갑
+241	魚	さかな	물고기. 생선
+242	先	さき	앞부분. 선두. 먼저
+243	咲く	さく	(꽃이) 피다
+244	作文	さくぶん	작문
+245	雑誌	ざっし	잡지
+246	砂糖	さとう	설탕
+247	寒い	さむい	춥다
+248	さようなら	さようなら	안녕히 가세요. 안녕히 계세요
+249	さん	さん	-씨
+250	三	さん	삼. 셋
+251	散歩	さんぽ	산책
+252	四	し	사. 넷
+253	-時	じ	-시
+254	塩	しお	소금
+255	しか	しか	-밖에(+부정문)
+256	時間	じかん	시간
+257	仕事	しごと	일. 업무
+258	辞書	じしょ	사전
+259	静かな	しずかな	조용한
+260	下	した	아래. 밑
+261	七	しち	칠. 일곱
+262	死ぬ	しぬ	죽다
+263	閉まる	しまる	닫히다
+264	締める	しめる	(넥타이를) 매다. 조이다. 조르다
+265	閉める	しめる	닫다
+266	写真	しゃしん	사진
+267	シャツ	シャツ	셔츠
+268	シャワー	シャワー	샤워
+269	十	じゅう	십. 열
+270	-週間	しゅうかん	-주일. -주간
+271	宿題	しゅくだい	숙제
+272	上手な	じょうずな	잘하는. 능숙한
+273	丈夫な	じょうぶな	튼튼한
+274	食堂	しょくどう	식당
+275	知る	しる	(1G) (지식으로) 알다
+276	白い	しろい	희다. 하얗다
+277	-人	じん	-인. -사람
+278	新聞	しんぶん	신문
+279	水曜日	すいようび	화요일
+280	吸う	すう	(담배를) 피우다. 들이마시다. 빨아들이다
+281	スカート	スカート	치마
+282	好きな	すきな	좋아하는
+283	すぐ	すぐ	곧. 바로
+284	少ない	すくない	적다
+285	少し	すこし	조금. 약간. 좀
+286	涼しい	すずしい	시원하다
+287	ストーブ	ストーブ	스토브. 난로
+288	スプーン	スプーン	스푼. 숟가락
+289	スポーツ	スポーツ	스포츠
+290	ズボン	ズボン	바지
+291	すみません	すみません	죄송합니다
+292	住む	すむ	살다
+293	する	する	하다
+294	座る	すわる	앉다
+295	背	せ	키
+296	生徒	せいと	(초중고등)학생
+297	セーター	セーター	스웨터
+298	狭い	せまい	좁다
+299	ゼロ	ゼロ	제로. 영
+300	千	せん	천
+301	先月	せんげつ	지난달
+302	先週	せんしゅう	지난주
+303	先生	せんせい	선생. 스승
+304	そこ	そこ	거기
+305	そちら	そちら	그쪽
+306	外	そと	밖. 바깥. 겉
+307	その	その	그
+308	そば	そば	곁. 옆
+309	そば	そば	메밀 국수
+310	空	そら	하늘
+311	それ	それ	그것
+312	そんな	そんな	그런
+313	大学	だいがく	대학
+314	大丈夫な	だいじょうぶな	괜찮은
+315	大好きな	だいすきな	매우 좋아하는
+316	台所	だいどころ	부엌
+317	大変	たいへん	매우. 대단히
+318	大変な	たいへんな	힘든. 큰일의
+319	高い	たかい	높다. 비싸다
+320	たくさん	たくさん	많이
+321	タクシー	タクシー	택시
+322	だけ	だけ	-만. -만큼
+323	出す	だす	내다. 꺼내다. 내놓다
+324	立つ	たつ	서다
+325	建物	たてもの	건물
+326	楽しい	たのしい	즐겁다
+327	食べ物	たべもの	음식물. 먹을 것
+328	食べる	たべる	먹다
+329	卵	たまご	알. 달걀. 계란
+330	誰	だれ	누구
+331	誕生日	たんじょうび	생일
+332	段々	だんだん	점점. 차차
+333	小さい	ちいさい	작다
+334	近い	ちかい	가깝다
+335	近く	ちかく	가까운 곳. 근처
+336	地下鉄	ちかてつ	지하철
+337	父	ちち	(나의)아버지
+338	ちょっと	ちょっと	조금. 좀. 잠깐
+339	一日	ついたち	1일 (날짜)
+340	使う	つかう	쓰다. 사용하다
+341	次	つぎ	다음
+342	机	つくえ	책상
+343	作る	つくる	만들다
+344	つもり	つもり	(-할)생각
+345	強い	つよい	강하다. 세다
+346	手	て	손
+347	テープ	テープ	테이프
+348	テーブル	テーブル	테이블
+349	手紙	てがみ	편지
+350	出口	でぐち	출구
+351	テスト	テスト	테스트. 검사. 시험
+352	デパート	デパート	백화점
+353	でも	でも	-라도
+354	出る	でる	나가다. 나오다
+355	テレビ	テレビ	텔레비전
+356	天気	てんき	날씨
+357	電気	でんき	전기. 전깃불
+358	電車	でんしゃ	전철
+359	電話	でんわ	전화
+360	ドア	ドア	도어. 문
+361	トイレ	トイレ	화장실
+362	どう	どう	어떻게
+363	どういたしまして	どういたしまして	천만의 말씀입니다. 별 말씀을 다 하십니다
+364	どうして	どうして	어째서. 왜
+365	どうぞ	どうぞ	아무쪼록. 부디. 어서 (+…하세요)
+366	動物	どうぶつ	동물
+367	どうも	どうも	정말. 참. 매우 (+고마워요)
+368	十	とお	열 개
+369	遠い	とおい	멀다
+370	十日	とおか	10일
+371	時々	ときどき	가끔. 때때로
+372	時計	とけい	시계
+373	どこ	どこ	어디
+374	所	ところ	곳. 장소
+375	年	とし	해. 나이
+376	図書館	としょかん	도서관
+377	どちら	どちら	어느 쪽
+378	とても	とても	아주. 매우
+379	どなた	どなた	어느 분. 누구(경어)
+380	隣	となり	이웃. 옆
+381	どの	どの	어느
+382	飛ぶ	とぶ	날다
+383	友達	ともだち	친구
+384	土曜日	どようび	토요일
+385	鳥	とり	새
+386	鳥肉	とりにく	닭고기
+387	撮る	とる	(사진을) 찍다
+388	どれ	どれ	어느 것
+389	どんな	どんな	어떤
+390	ない	ない	없다
+391	ナイフ	ナイフ	나이프. 칼
+392	中	なか	가운데. 중. 안. 속
+393	長い	ながい	길다. 오래다
+394	なぜ	なぜ	왜.어째서
+395	夏	なつ	여름
+396	夏休み	なつやすみ	여름방학. 여름휴가
+397	七	なな	일곱 ＝しち
+398	七つ	ななつ	일곱 개
+399	何	なに	무엇
+400	七日	なのか	7일
+401	名前	なまえ	이름
+402	習う	ならう	배우다
+403	何	なん	무엇. 몇-
+404	二	に	이. 둘
+405	にぎやかな	にぎやかな	번화한. 활기찬
+406	肉	にく	고기
+407	西	にし	서쪽
+408	-日	にち	-일
+409	日曜日	にちようび	일요일
+410	庭	にわ	정원. 뜰. 마당
+411	-人	にん	-명
+412	ネクタイ	ネクタイ	넥타이
+413	猫	ねこ	고양이
+414	寝る	ねる	자다
+415	-年	ねん	-년
+416	ノート	ノート	노트
+417	登る	のぼる	(산에) 올라가다
+418	飲み物	のみもの	마실 것. 음료
+419	飲む	のむ	마시다. (술을) 먹다. (약을) 복용하다
+420	乗る	のる	(-に+) 타다
+421	はい	はい	예. 네
+422	入る	はいる	(1G) 들어가다. 들어오다
+423	葉書	はがき	엽서
+424	はく	はく	(바지 치마를) 입다. (신발을) 신다
+425	始まる	はじまる	시작되다
+426	はじめまして	はじめまして	처음 뵙겠습니다
+427	バス	バス	버스
+428	二十歳	はたち	스무살
+429	八	はち	팔. 여덟
+430	二十日	はつか	20일
+431	花	はな	꽃
+432	鼻	はな	코
+433	話	はなし	이야기
+434	話す	はなす	이야기하다
+435	母	はは	(나의)어머니
+436	早い	はやい	이르다. 빠르다
+437	春	はる	봄
+438	パン	パン	빵
+439	-半	はん	-반. 30분
+440	ハンカチ	ハンカチ	손수건
+441	番号	ばんごう	번호
+442	晩御飯	ばんごはん	저녁 식사
+443	ハンサムな	ハンサムな	잘생긴. 미남의
+444	東	ひがし	동쪽
+445	低い	ひくい	낮다
+446	飛行機	ひこうき	비행기
+447	左	ひだり	왼쪽. 좌측
+448	人	ひと	사람
+449	一つ	ひとつ	한 개
+450	一人	ひとり	한 사람
+451	暇な	ひまな	한가한
+452	百	ひゃく	백
+453	病院	びょういん	병원
+454	病気	びょうき	병
+455	昼	ひる	낮
+456	昼御飯	ひるごはん	점심
+457	広い	ひろい	넓다
+458	服	ふく	옷. 양복
+459	二つ	ふたつ	두 개
+460	豚肉	ぶたにく	돼지고기
+461	二人	ふたり	두 사람
+462	二日	ふつか	2일
+463	冬	ふゆ	겨울
+464	降る	ふる	(비가) 내리다
+465	古い	ふるい	오래되다. 낡다
+466	-分	ふん/-ぷん	-분
+467	下手な	へたな	못하는. 서투른
+468	部屋	へや	방
+469	ペン	ペン	펜
+470	勉強	べんきょう	공부
+471	便利な	べんりな	편리한
+472	方	ほう	방면. 방향. 쪽
+473	帽子	ぼうし	모자
+474	ボールペン	ボールペン	볼펜
+475	他	ほか	다른 것. 딴 것
+476	他に	ほかに	그밖에. 그외에
+477	他の	ほかの	다른
+478	ポケット	ポケット	포켓. 호주머니
+479	欲しい	ほしい	갖고 싶다
+480	ボタン	ボタン	단추. 버튼
+481	ホテル	ホテル	호텔
+482	-本	ほん/-ぽん/-ぼん	-자루. -개비. -병
+483	本	ほん	책
+484	-枚	まい	-장
+485	毎朝	まいあさ	매일 아침. 아침마다
+486	毎月	まいげつ	매월 ＝まいつき
+487	毎週	まいしゅう	매주
+488	毎月	まいつき	매월
+489	毎年	まいとし	매년
+490	毎日	まいにち	매일
+491	毎年	まいねん	매년 ＝まいとし
+492	毎晩	まいばん	매일 밤. 밤마다
+493	前	まえ	앞. 전
+494	曲がる	まがる	구부러지다. (우측 좌측으로) 돌다
+495	まずい	まずい	맛없다
+496	また	また	또. 다시
+497	まだ	まだ	아직
+498	町	まち	동네. 동. 시내
+499	待つ	まつ	기다리다
+500	まっすぐ	まっすぐ	쭉. 똑바로. 곧장. 직선으로
+501	窓	まど	창. 창문
+502	丸い	まるい	둥글다. 동그랗다
+503	万	まん	만
+504	磨く	みがく	닦다
+505	右	みぎ	오른쪽. 우측
+506	短い	みじかい	짧다
+507	水	みず	물
+508	店	みせ	가게
+509	見せる	みせる	보여주다
+510	道	みち	길
+511	三日	みっか	3일
+512	三つ	みっつ	세 개
+513	緑	みどり	녹색
+514	皆さん	みなさん	여러분
+515	南	みなみ	남쪽
+516	耳	みみ	귀
+517	見る	みる	보다
+518	みんな	みんな	모두들
+519	六日	むいか	6일
+520	難しい	むずかしい	어렵다
+521	六つ	むっつ	여섯 개
+522	目	め	눈
+523	眼鏡	めがね	안경
+524	もう	もう	이미. 벌써
+525	もう一度	もういちど	한번 더. 다시 한번
+526	木曜日	もくようび	화요일
+527	もしもし	もしもし	여보세요
+528	持つ	もつ	들다. 가지다. 쥐다
+529	もっと	もっと	더. 좀더. 더욱
+530	物	もの	물건
+531	門	もん	대문
+532	問題	もんだい	문제
+533	八百屋	やおや	야채 가게
+534	野菜	やさい	야채. 채소
+535	易しい	やさしい	쉽다
+536	優しい	やさしい	상냥하다. 정답다
+537	安い	やすい	싸다
+538	休み	やすみ	쉼. 휴식. 쉬는 시간. 휴일. 휴가
+539	休む	やすむ	쉬다
+540	八つ	やっつ	여덟 개
+541	山	やま	산
+542	夕方	ゆうがた	저녁때
+543	夕御飯	ゆうごはん	저녁 식사
+544	夕飯	ゆうはん	저녁 식사 ＝ゆうごはん
+545	郵便局	ゆうびんきょく	우체국
+546	雪	ゆき	눈
+547	ゆっくり	ゆっくり	천천히. 푹(+쉬다)
+548	良い	よい	좋다 ＝いい
+549	八日	ようか	8일
+550	洋服	ようふく	양복
+551	よく	よく	(정도)잘. (빈도)자주
+552	横	よこ	옆. 가로. 측면
+553	四日	よっか	4일
+554	四つ	よっつ	네 개
+555	予定	よてい	예정
+556	呼ぶ	よぶ	부르다
+557	読む	よむ	읽다
+558	夜	よる	밤
+559	よろしく	よろしく	잘 (+부탁합니다)
+560	弱い	よわい	약하다
+561	四	よん	넷 ＝し
+562	ラーメン	ラーメン	라면
+563	来月	らいげつ	다음달
+564	来週	らいしゅう	다음주
+565	来年	らいねん	내년
+566	ラジオ	ラジオ	라디오
+567	留学生	りゅうがくせい	유학생
+568	両親	りょうしん	부모
+569	料理	りょうり	요리
+570	レストラン	レストラン	레스토랑
+571	六	ろく	육. 여섯
+572	分かる	わかる	알다. 이해하다
+573	私	わたし	저
+574	悪い	わるい	나쁘다`;
+
+    function parseVocab(text) {
+      const lines = text.trim().split("\n");
+      const rows = new Array(lines.length);
+      let n = 0;
+      for (let i = 0; i < lines.length; i++) {
+        const parts = lines[i].split("\t");
+        if (parts.length < 4) continue;
+        rows[n++] = {
+          no: +parts[0] || 0,
+          word: parts[1],
+          reading: parts[2],
+          meaning: parts[3],
+        };
+      }
+      rows.length = n;
+      return rows;
+    }
+
+    const N5_VOCAB_LEGACY_RAW = `1	会う	あう (아우)	(-に+) 만나다
+2	青い	あおい (아오이)	푸르다. 파랗다
+3	赤い	あかい (아카이)	붉다. 빨갛다
+4	明るい	あかるい (아카루이)	밝다. 환하다. 명랑하다
+5	秋	あき (아키)	가을
+6	開く	あく (아쿠)	열리다
+7	開ける	あける (아케루)	열다
+8	朝	あさ (아사)	아침
+9	朝御飯	あさごはん (아사고하)	아침 식사
+10	あさって	あさって (아사떼)	모레
+11	足	あし (아시)	발. 다리
+12	明日	あした (아시타)	내일
+13	あそこ	あそこ (아소코)	저기
+14	遊ぶ	あそぶ (아소부)	놀다
+15	暖かい	あたたかい (아타타카이)	따뜻하다
+16	頭	あたま (아타마)	머리
+17	新しい	あたらしい (아타라시이)	새롭다
+18	あちら	あちら (아치라)	저쪽
+19	暑い	あつい (아츠이)	덥다
+20	後	あと (아토)	(시간적으로)후. 나중
+21	あなた	あなた (아나타)	당신
+22	兄	あに (아니)	(나의)형. 오빠
+23	姉	あね (아네)	(나의)누나. 언니
+24	あの	あの (아노)	저
+25	アパート	アパート (아아토)	아파트
+26	浴びる	あびる (아비루)	뒤집어쓰다. (샤워를) 하다
+27	危ない	あぶない (아부나이)	위험하다
+28	甘い	あまい (아마이)	달다. 달콤하다
+29	あまり	あまり (아마리)	별로. 그다지(+부정문)
+30	雨	あめ (아메)	비
+31	洗う	あらう (아라우)	씻다
+32	ありがとうございます	ありがとうございます (아리가토우고자이마스)	감사합니다
+33	ある	ある (아루)	있다
+34	歩く	あるく (아루쿠)	걷다
+35	あれ	あれ (아레)	저것
+36	あんな	あんな (아나)	저런
+37	いい	いい (이이)	좋다
+38	いいえ	いいえ (이이에)	아니오
+39	言う	いう (이우)/ゆう (유우)	말하다
+40	家	いえ (이에)	집
+41	行く	いく (이쿠)	가다
+42	いくつ	いくつ (이쿠츠)	몇. 몇개. 몇살
+43	いくら	いくら (이쿠라)	얼마
+44	医者	いしゃ (이샤)	의사
+45	椅子	いす (이스)	의자
+46	忙しい	いそがしい (이소가시이)	바쁘다
+47	痛い	いたい (이타이)	아프다
+48	いただきます	いただきます (이타다키마스)	잘 먹겠습니다
+49	一	いち (이치)	일. 하나
+50	一日	いちにち (이치니치)	하루 (기간)
+51	一番	いちばん (이치바)	일번. 첫째. 가장. 제일
+52	いつ	いつ (이츠)	언제
+53	五日	いつか (이츠카)	5일
+54	一週間	いっしゅうかん (잇슈카)	일주일
+55	いっしょに	いっしょに (잇쇼니)	같이. 함께
+56	五つ	いつつ (이츠츠)	다섯 개
+57	いつも	いつも (이츠모)	언제나.늘
+58	犬	いぬ (이누)	개
+59	今	いま (이마)	지금
+60	意味	いみ (이미)	의미. 뜻
+61	妹	いもうと (이모우토)	여동생
+62	嫌な	いやな (이야나)	싫은
+63	いらっしゃいませ	いらっしゃいませ (이라샤이마세)	어서 오십시오
+64	入口	いりぐち (이리구치)	입구
+65	いる	いる (이루)	(사람이나 동물이) 있다
+66	要る	いる (이루)	(1G) 필요하다
+67	入れる	いれる (이레루)	넣다
+68	色	いろ (이로)	색
+69	色々	いろいろ (이로이로)	여러 가지로
+70	色々な	いろいろな (이로이로나)	여러가지의
+71	上	うえ (우에)	위
+72	後ろ	うしろ (우시로)	뒤. 뒤쪽
+73	歌	うた (우타)	노래
+74	歌う	うたう (우타우)	노래 부르다
+75	うどん	うどん (우도)	우동
+76	生まれる	うまれる (우마레루)	태어나다
+77	海	うみ (우미)	바다
+78	売る	うる (우루)	팔다
+79	うるさい	うるさい (우루사이)	시끄럽다
+80	上着	うわぎ (우와기)	겉옷. 내복 위에 입는 옷
+81	絵	え (에)	그림
+82	英語	えいご (에이고)	영어
+83	駅	えき (에키)	역
+84	エレベーター	エレベーター (에레에아)	엘리베이터. 승강기
+85	-円	えん (엔)	엔(일본 화폐 단위)
+86	鉛筆	えんぴつ (엔피츠)	연필
+87	おいしい	おいしい (오이시이)	맛있다
+88	多い	おおい (오오이)	많다
+89	大きい	おおきい (오오키이)	크다
+90	お母さん	おかあさん (오카아상)	어머니
+91	お菓子	おかし (오카시)	과자
+92	お金	おかね (오카네)	돈
+93	起きる	おきる (오키루)	일어나다
+94	置く	おく (오쿠)	두다. 놓다
+95	奥さん	おくさん (오쿠상)	부인. 아주머니
+96	お酒	おさけ (오사케)	술
+97	おじいさん	おじいさん (오지이상)	할아버지
+98	教える	おしえる (오시에루)	가르치다
+99	おじさん	おじさん (오지상)	아저씨
+100	押す	おす (오스)	밀다. 누르다`;
+    const N5_VOCAB_NEW_RAW = `1	間	あいだ	사이. 동안
+2	言う	いう/ゆう	말하다
+3	遅い	おそい	늦다. 느리다
+4	お茶	おちゃ	차
+5	お父さん	おとうさん	아버지
+6	弟	おとうと	남동생
+7	男	おとこ	남자
+8	男の子	おとこのこ	남자 아이
+9	おととい	おととい	그저께
+10	おととし	おととし	재작년
+11	大人	おとな	어른
+12	お腹	おなか	배
+13	同じ	おなじ	같은. 동일한
+14	お兄さん	おにいさん	형. 오빠
+15	お姉さん	おねえさん	누나. 언니
+16	おねがいします	おねがいします	부탁합니다
+17	おばあさん	おばあさん	할머니
+18	おばさん	おばさん	아주머니
+19	おはようございます	おはようございます	안녕하세요(아침인사)
+20	お風呂	おふろ	목욕. 목욕탕
+21	覚える	おぼえる	외우다. 기억하다
+22	重い	おもい	무겁다
+23	思う	おもう	생각하다. 헤아리다. 느끼다
+24	おもしろい	おもしろい	재미있다. 우습다
+25	おやすみなさい	おやすみなさい	안녕히 주무세요
+26	泳ぐ	およぐ	헤엄치다. 수영을 하다
+27	降りる	おりる	(차에서) 내리다
+28	終わる	おわる	끝나다. 마치다
+29	音楽	おんがく	음악
+30	女	おんな	여자
+31	女の子	おんなのこ	여자 아이
+32	外国	がいこく	외국
+33	会社	かいしゃ	회사
+34	階段	かいだん	계단
+35	買い物	かいもの	물건을 삼. 쇼핑. 장보기
+36	買う	かう	사다. 구입하다
+37	返す	かえす	돌려주다
+38	帰る	かえる	(1G) 돌아가다. 돌아오다
+39	顔	かお	얼굴
+40	かかる	かかる	(시간이) 걸리다. (돈이) 들다
+41	鍵	かぎ	열쇠
+42	書く	かく	쓰다. 적다
+43	学生	がくせい	학생. (특히 대학생)
+44	-か月	かげつ	-개월
+45	かける	かける	(안경을) 쓰다. 끼다
+46	傘	かさ	우산
+47	貸す	かす	빌려주다
+48	風	かぜ	바람
+49	風邪	かぜ	감기
+50	家族	かぞく	가족
+51	-月	がつ	-월
+52	学校	がっこう	학교
+53	角	かど	모난 귀퉁이. 구석. 길모퉁이
+54	鞄	かばん	가방
+55	花瓶	かびん	화병. 꽃병
+56	かぶる	かぶる	(모자를) 쓰다
+57	紙	かみ	종이
+58	カメラ	カメラ	카메라
+59	火曜日	かようび	화요일
+60	辛い	からい	맵다
+61	体	からだ	몸
+62	借りる	かりる	빌리다. 꾸다
+63	軽い	かるい	가볍다
+64	カレンダー	カレンダー	달력
+65	川	かわ	강
+66	かわいい	かわいい	귀엽다
+67	-間	かん	-간
+68	漢字	かんじ	한자
+69	木	き	나무
+70	黄色い	きいろい	노랗다
+71	消える	きえる	꺼지다. 사라지다. 지워지다
+72	聞く	きく	듣다. 물어보다
+73	北	きた	북쪽
+74	ギター	ギター	기타
+75	汚い	きたない	더럽다
+76	喫茶店	きっさてん	찻집. 다방
+77	切手	きって	우표
+78	切符	きっぷ	표
+79	昨日	きのう	어제
+80	九	きゅう	구. 아홉
+81	牛肉	ぎゅうにく	쇠고기
+82	牛乳	ぎゅうにゅう	우유
+83	今日	きょう	오늘
+84	教室	きょうしつ	교실
+85	兄弟	きょうだい	형제
+86	去年	きょねん	작년
+87	嫌いな	きらいな	싫어하는
+88	着る	きる	입다
+89	きれいな	きれいな	예쁜. 깨끗한
+90	銀行	ぎんこう	은행
+91	金曜日	きんようび	화요일
+92	薬	くすり	약
+93	果物	くだもの	과일
+94	口	くち	입
+95	靴	くつ	신발. 구두
+96	靴下	くつした	양말
+97	国	くに	나라
+98	くらい/ぐらい	くらい/ぐらい	-정도. -만큼
+99	暗い	くらい	어둡다
+100	クラス	クラス	클래스. 반. 학급
+101	来る	くる	오다
+102	車	くるま	수레의 총칭. 차
+103	黒い	くろい	검다. 까맣다
+104	今朝	けさ	오늘 아침
+105	消す	けす	끄다. 지우다
+106	結婚	けっこん	결혼
+107	月曜日	げつようび	화요일
+108	元気な	げんきな	건강한. 잘 있는
+109	五	ご	오. 다섯
+110	-語	ご	-어(언어)
+111	公園	こうえん	공원
+112	紅茶	こうちゃ	홍차
+113	交番	こうばん	파출소
+114	声	こえ	소리
+115	コート	コート	코트
+116	コーヒー	コーヒー	커피
+117	ここ	ここ	여기
+118	午後	ごご	오후
+119	九日	ここのか	9일
+120	九つ	ここのつ	아홉 개
+121	午前	ごぜん	오전
+122	答える	こたえる	대답하다
+123	ごちそうさまでした	ごちそうさまでした	잘 먹었습니다
+124	こちら	こちら	이쪽
+125	コップ	コップ	컵
+126	今年	ことし	올해
+127	子供	こども	아이. 자식
+128	この	この	이
+129	御飯	ごはん	밥
+130	コピー	コピー	복사
+131	困る	こまる	곤란하다
+132	これ	これ	이것
+133	-頃	ごろ	-경. -쯤
+134	今月	こんげつ	이번달
+135	今週	こんしゅう	이번주
+136	こんな	こんな	이런
+137	こんにちは	こんにちは	안녕하세요(낮인사)
+138	今晩	こんばん	오늘 밤
+139	こんばんは	こんばんは	안녕하세요(저녁인사)
+140	-歳	さい	-살. -세
+141	財布	さいふ	지갑
+142	魚	さかな	물고기. 생선
+143	先	さき	앞부분. 선두. 먼저
+144	咲く	さく	(꽃이) 피다
+145	作文	さくぶん	작문
+146	雑誌	ざっし	잡지
+147	砂糖	さとう	설탕
+148	寒い	さむい	춥다
+149	さようなら	さようなら	안녕히 가세요. 안녕히 계세요
+150	さん	さん	-씨
+151	三	さん	삼. 셋
+152	散歩	さんぽ	산책
+153	四	し	사. 넷
+154	-時	じ	-시
+155	塩	しお	소금
+156	しか	しか	-밖에(+부정문)
+157	時間	じかん	시간
+158	仕事	しごと	일. 업무
+159	辞書	じしょ	사전
+160	静かな	しずかな	조용한
+161	下	した	아래. 밑
+162	七	しち	칠. 일곱
+163	死ぬ	しぬ	죽다
+164	閉まる	しまる	닫히다
+165	締める	しめる	(넥타이를) 매다. 조이다. 조르다
+166	閉める	しめる	닫다
+167	写真	しゃしん	사진
+168	シャツ	シャツ	셔츠
+169	シャワー	シャワー	샤워
+170	十	じゅう	십. 열
+171	-週間	しゅうかん	-주일. -주간
+172	宿題	しゅくだい	숙제
+173	上手な	じょうずな	잘하는. 능숙한
+174	丈夫な	じょうぶな	튼튼한
+175	食堂	しょくどう	식당
+176	知る	しる	(1G) (지식으로) 알다
+177	白い	しろい	희다. 하얗다
+178	-人	じん	-인. -사람
+179	新聞	しんぶん	신문
+180	水曜日	すいようび	화요일
+181	吸う	すう	(담배를) 피우다. 들이마시다. 빨아들이다
+182	スカート	スカート	치마
+183	好きな	すきな	좋아하는
+184	すぐ	すぐ	곧. 바로
+185	少ない	すくない	적다
+186	少し	すこし	조금. 약간. 좀
+187	涼しい	すずしい	시원하다
+188	ストーブ	ストーブ	스토브. 난로
+189	スプーン	スプーン	스푼. 숟가락
+190	スポーツ	スポーツ	스포츠
+191	ズボン	ズボン	바지
+192	すみません	すみません	죄송합니다
+193	住む	すむ	살다
+194	する	する	하다
+195	座る	すわる	앉다
+196	背	せ	키
+197	生徒	せいと	(초중고등)학생
+198	セーター	セーター	스웨터
+199	狭い	せまい	좁다
+200	ゼロ	ゼロ	제로. 영
+201	千	せん	천
+202	先月	せんげつ	지난달
+203	先週	せんしゅう	지난주
+204	先生	せんせい	선생. 스승
+205	そこ	そこ	거기
+206	そちら	そちら	그쪽
+207	外	そと	밖. 바깥. 겉
+208	その	その	그
+209	そば	そば	곁. 옆
+210	そば	そば	메밀 국수
+211	空	そら	하늘
+212	それ	それ	그것
+213	そんな	そんな	그런
+214	大学	だいがく	대학
+215	大丈夫な	だいじょうぶな	괜찮은
+216	大好きな	だいすきな	매우 좋아하는
+217	台所	だいどころ	부엌
+218	大変	たいへん	매우. 대단히
+219	大変な	たいへんな	힘든. 큰일의
+220	高い	たかい	높다. 비싸다
+221	たくさん	たくさん	많이
+222	タクシー	タクシー	택시
+223	だけ	だけ	-만. -만큼
+224	出す	だす	내다. 꺼내다. 내놓다
+225	立つ	たつ	서다
+226	建物	たてもの	건물
+227	楽しい	たのしい	즐겁다
+228	食べ物	たべもの	음식물. 먹을 것
+229	食べる	たべる	먹다
+230	卵	たまご	알. 달걀. 계란
+231	誰	だれ	누구
+232	誕生日	たんじょうび	생일
+233	段々	だんだん	점점. 차차
+234	小さい	ちいさい	작다
+235	近い	ちかい	가깝다
+236	近く	ちかく	가까운 곳. 근처
+237	地下鉄	ちかてつ	지하철
+238	父	ちち	(나의)아버지
+239	ちょっと	ちょっと	조금. 좀. 잠깐
+240	一日	ついたち	1일 (날짜)
+241	使う	つかう	쓰다. 사용하다
+242	次	つぎ	다음
+243	机	つくえ	책상
+244	作る	つくる	만들다
+245	つもり	つもり	(-할)생각
+246	強い	つよい	강하다. 세다
+247	手	て	손
+248	テープ	テープ	테이프
+249	テーブル	テーブル	테이블
+250	手紙	てがみ	편지
+251	出口	でぐち	출구
+252	テスト	テスト	테스트. 검사. 시험
+253	デパート	デパート	백화점
+254	でも	でも	-라도
+255	出る	でる	나가다. 나오다
+256	テレビ	テレビ	텔레비전
+257	天気	てんき	날씨
+258	電気	でんき	전기. 전깃불
+259	電車	でんしゃ	전철
+260	電話	でんわ	전화
+261	ドア	ドア	도어. 문
+262	トイレ	トイレ	화장실
+263	どう	どう	어떻게
+264	どういたしまして	どういたしまして	천만의 말씀입니다. 별 말씀을 다 하십니다
+265	どうして	どうして	어째서. 왜
+266	どうぞ	どうぞ	아무쪼록. 부디. 어서 (+…하세요)
+267	動物	どうぶつ	동물
+268	どうも	どうも	정말. 참. 매우 (+고마워요)
+269	十	とお	열 개
+270	遠い	とおい	멀다
+271	十日	とおか	10일
+272	時々	ときどき	가끔. 때때로
+273	時計	とけい	시계
+274	どこ	どこ	어디
+275	所	ところ	곳. 장소
+276	年	とし	해. 나이
+277	図書館	としょかん	도서관
+278	どちら	どちら	어느 쪽
+279	とても	とても	아주. 매우
+280	どなた	どなた	어느 분. 누구(경어)
+281	隣	となり	이웃. 옆
+282	どの	どの	어느
+283	飛ぶ	とぶ	날다
+284	友達	ともだち	친구
+285	土曜日	どようび	토요일
+286	鳥	とり	새
+287	鳥肉	とりにく	닭고기
+288	撮る	とる	(사진을) 찍다
+289	どれ	どれ	어느 것
+290	どんな	どんな	어떤
+291	ない	ない	없다
+292	ナイフ	ナイフ	나이프. 칼
+293	中	なか	가운데. 중. 안. 속
+294	長い	ながい	길다. 오래다
+295	なぜ	なぜ	왜.어째서
+296	夏	なつ	여름
+297	夏休み	なつやすみ	여름방학. 여름휴가
+298	七	なな	일곱 ＝しち
+299	七つ	ななつ	일곱 개
+300	何	なに	무엇
+301	七日	なのか	7일
+302	名前	なまえ	이름
+303	習う	ならう	배우다
+304	何	なん	무엇. 몇-
+305	二	に	이. 둘
+306	にぎやかな	にぎやかな	번화한. 활기찬
+307	肉	にく	고기
+308	西	にし	서쪽
+309	-日	にち	-일
+310	日曜日	にちようび	일요일
+311	庭	にわ	정원. 뜰. 마당
+312	-人	にん	-명
+313	ネクタイ	ネクタイ	넥타이
+314	猫	ねこ	고양이
+315	寝る	ねる	자다
+316	-年	ねん	-년
+317	ノート	ノート	노트
+318	登る	のぼる	(산에) 올라가다
+319	飲み物	のみもの	마실 것. 음료
+320	飲む	のむ	마시다. (술을) 먹다. (약을) 복용하다
+321	乗る	のる	(-に+) 타다
+322	はい	はい	예. 네
+323	入る	はいる	(1G) 들어가다. 들어오다
+324	葉書	はがき	엽서
+325	はく	はく	(바지 치마를) 입다. (신발을) 신다
+326	始まる	はじまる	시작되다
+327	はじめまして	はじめまして	처음 뵙겠습니다
+328	バス	バス	버스
+329	二十歳	はたち	스무살
+330	八	はち	팔. 여덟
+331	二十日	はつか	20일
+332	花	はな	꽃
+333	鼻	はな	코
+334	話	はなし	이야기
+335	話す	はなす	이야기하다
+336	母	はは	(나의)어머니
+337	早い	はやい	이르다. 빠르다
+338	春	はる	봄
+339	パン	パン	빵
+340	-半	はん	-반. 30분
+341	ハンカチ	ハンカチ	손수건
+342	番号	ばんごう	번호
+343	晩御飯	ばんごはん	저녁 식사
+344	ハンサムな	ハンサムな	잘생긴. 미남의
+345	東	ひがし	동쪽
+346	低い	ひくい	낮다
+347	飛行機	ひこうき	비행기
+348	左	ひだり	왼쪽. 좌측
+349	人	ひと	사람
+350	一つ	ひとつ	한 개
+351	一人	ひとり	한 사람
+352	暇な	ひまな	한가한
+353	百	ひゃく	백
+354	病院	びょういん	병원
+355	病気	びょうき	병
+356	昼	ひる	낮
+357	昼御飯	ひるごはん	점심
+358	広い	ひろい	넓다
+359	服	ふく	옷. 양복
+360	二つ	ふたつ	두 개
+361	豚肉	ぶたにく	돼지고기
+362	二人	ふたり	두 사람
+363	二日	ふつか	2일
+364	冬	ふゆ	겨울
+365	降る	ふる	(비가) 내리다
+366	古い	ふるい	오래되다. 낡다
+367	-分	ふん/-ぷん	-분
+368	下手な	へたな	못하는. 서투른
+369	部屋	へや	방
+370	ペン	ペン	펜
+371	勉強	べんきょう	공부
+372	便利な	べんりな	편리한
+373	方	ほう	방면. 방향. 쪽
+374	帽子	ぼうし	모자
+375	ボールペン	ボールペン	볼펜
+376	他	ほか	다른 것. 딴 것
+377	他に	ほかに	그밖에. 그외에
+378	他の	ほかの	다른
+379	ポケット	ポケット	포켓. 호주머니
+380	欲しい	ほしい	갖고 싶다
+381	ボタン	ボタン	단추. 버튼
+382	ホテル	ホテル	호텔
+383	-本	ほん/-ぽん/-ぼん	-자루. -개비. -병
+384	本	ほん	책
+385	-枚	まい	-장
+386	毎朝	まいあさ	매일 아침. 아침마다
+387	毎月	まいげつ	매월 ＝まいつき
+388	毎週	まいしゅう	매주
+389	毎月	まいつき	매월
+390	毎年	まいとし	매년
+391	毎日	まいにち	매일
+392	毎年	まいねん	매년 ＝まいとし
+393	毎晩	まいばん	매일 밤. 밤마다
+394	前	まえ	앞. 전
+395	曲がる	まがる	구부러지다. (우측 좌측으로) 돌다
+396	まずい	まずい	맛없다
+397	また	また	또. 다시
+398	まだ	まだ	아직
+399	町	まち	동네. 동. 시내
+400	待つ	まつ	기다리다
+401	まっすぐ	まっすぐ	쭉. 똑바로. 곧장. 직선으로
+402	窓	まど	창. 창문
+403	丸い	まるい	둥글다. 동그랗다
+404	万	まん	만
+405	磨く	みがく	닦다
+406	右	みぎ	오른쪽. 우측
+407	短い	みじかい	짧다
+408	水	みず	물
+409	店	みせ	가게
+410	見せる	みせる	보여주다
+411	道	みち	길
+412	三日	みっか	3일
+413	三つ	みっつ	세 개
+414	緑	みどり	녹색
+415	皆さん	みなさん	여러분
+416	南	みなみ	남쪽
+417	耳	みみ	귀
+418	見る	みる	보다
+419	みんな	みんな	모두들
+420	六日	むいか	6일
+421	難しい	むずかしい	어렵다
+422	六つ	むっつ	여섯 개
+423	目	め	눈
+424	眼鏡	めがね	안경
+425	もう	もう	이미. 벌써
+426	もう一度	もういちど	한번 더. 다시 한번
+427	木曜日	もくようび	화요일
+428	もしもし	もしもし	여보세요
+429	持つ	もつ	들다. 가지다. 쥐다
+430	もっと	もっと	더. 좀더. 더욱
+431	物	もの	물건
+432	門	もん	대문
+433	問題	もんだい	문제
+434	八百屋	やおや	야채 가게
+435	野菜	やさい	야채. 채소
+436	易しい	やさしい	쉽다
+437	優しい	やさしい	상냥하다. 정답다
+438	安い	やすい	싸다
+439	休み	やすみ	쉼. 휴식. 쉬는 시간. 휴일. 휴가
+440	休む	やすむ	쉬다
+441	八つ	やっつ	여덟 개
+442	山	やま	산
+443	夕方	ゆうがた	저녁때
+444	夕御飯	ゆうごはん	저녁 식사
+445	夕飯	ゆうはん	저녁 식사 ＝ゆうごはん
+446	郵便局	ゆうびんきょく	우체국
+447	雪	ゆき	눈
+448	ゆっくり	ゆっくり	천천히. 푹(+쉬다)
+449	良い	よい	좋다 ＝いい
+450	八日	ようか	8일
+451	洋服	ようふく	양복
+452	よく	よく	(정도)잘. (빈도)자주
+453	横	よこ	옆. 가로. 측면
+454	四日	よっか	4일
+455	四つ	よっつ	네 개
+456	予定	よてい	예정
+457	呼ぶ	よぶ	부르다
+458	読む	よむ	읽다
+459	夜	よる	밤
+460	よろしく	よろしく	잘 (+부탁합니다)
+461	弱い	よわい	약하다
+462	四	よん	넷 ＝し
+463	ラーメン	ラーメン	라면
+464	来月	らいげつ	다음달
+465	来週	らいしゅう	다음주
+466	来年	らいねん	내년
+467	ラジオ	ラジオ	라디오
+468	留学生	りゅうがくせい	유학생
+469	両親	りょうしん	부모
+470	料理	りょうり	요리
+471	レストラン	レストラン	레스토랑
+472	六	ろく	육. 여섯
+473	分かる	わかる	알다. 이해하다
+474	私	わたし	저
+475	悪い	わるい	나쁘다`;
+    const N4_VOCAB_RAW = `1	ああ	ああ	저렇게
+2	あいさつ	あいさつ	인사
+3	アイロン	アイロン	다리미
+4	合う	あう	딱 맞다. 서로 …하다
+5	赤ちゃん	あかちゃん	아기
+6	空く	あく	비다
+7	アクセサリー	アクセサリー	액세서리
+8	あげる	あげる	주다
+9	あご	あご	턱
+10	浅い	あさい	얕다
+11	味	あじ	맛
+12	アジア	アジア	아시아
+13	明日	あす	내일(방송용어) ＝あした
+14	汗	あせ	땀
+15	遊び	あそび	노는 일. 놀이
+16	厚い	あつい	두껍다. 두텁다
+17	熱い	あつい	뜨겁다
+18	あっち	あっち	저쪽
+19	集まる	あつまる	모이다
+20	集める	あつめる	모으다
+21	アナウンサー	アナウンサー	아나운서
+22	アフリカ	アフリカ	아프리카
+23	飴	あめ	엿. 캔디
+24	アメリカ	アメリカ	미국
+25	謝る	あやまる	사과하다
+26	アルコール	アルコール	알코올
+27	アルバイト	アルバイト	아르바이트
+28	安心	あんしん	안심
+29	安全な	あんぜんな	안전한
+30	案内	あんない	안내
+31	あんなに	あんなに	저렇게(도). 저렇게(까지)
+32	以下	いか	이하
+33	以外	いがい	이외. 그 밖
+34	いかがですか	いかがですか	どうですか보다 공손한 말. 어떻습니까
+35	医学	いがく	의학
+36	生きる	いきる	삶을 살아가다. 생존하다
+37	池	いけ	연못
+38	意見	いけん	의견
+39	石	いし	돌
+40	いじめる	いじめる	괴롭히다
+41	以上	いじょう	이상
+42	急ぐ	いそぐ	서두르다
+43	致す	いたす	する의 낮춤말. 해드리다
+44	頂く	いただく	食べる・飲む・もらう의 낮춤말. 먹다. 마시다. 받다
+45	一々	いちいち	일일이. 하나하나
+46	一度	いちど	한번
+47	いつか	いつか	언젠가
+48	一生懸命	いっしょうけんめい	열심히
+49	一体	いったい	도대체
+50	いってきます	いってきます	다녀오겠습니다
+51	いってらっしゃい	いってらっしゃい	다녀오세요
+52	一杯	いっぱい	가득. 한잔
+53	糸	いと	실
+54	以内	いない	이내
+55	田舎	いなか	시골
+56	命	いのち	목숨. 생명
+57	祈る	いのる	빌다. 기도하다
+58	居間	いま	거실
+59	いらっしゃる	いらっしゃる	行く・来る・いる의 높임말. 가시다. 오시다. 계시다
+60	祝う	いわう	축하하다. 축복하다
+61	植える	うえる	심다
+62	伺う	うかがう	聞く・訪ねる의 낮춤말. 여쭙다. 찾아뵙다
+63	受付	うけつけ	접수. 접수처
+64	受ける	うける	(추상적인 것을) 받다
+65	動かす	うごかす	-를 움직이다
+66	動く	うごく	-가 움직이다
+67	薄い	うすい	얇다. 엷다. 싱겁다
+68	嘘	うそ	거짓말
+69	うち	うち	저희(집). 우리(집)
+70	打つ	うつ	치다. 때리다. 두드리다
+71	美しい	うつくしい	아름답다
+72	写す	うつす	베끼다. 묘사하다. (사진을) 찍다
+73	腕	うで	팔
+74	うまい	うまい	맛있다. 잘하다
+75	裏	うら	뒷면
+76	売(り)場	うりば	파는 곳. 매장
+77	うれしい	うれしい	기쁘다
+78	運	うん	운. 운수
+79	運転	うんてん	운전
+80	運転手	うんてんしゅ	운전 기사
+81	運動	うんどう	운동
+82	映画	えいが	영화
+83	営業	えいぎょう	영업
+84	ええ	ええ	네. 예
+85	エスカレーター	エスカレーター	에스컬레이터
+86	枝	えだ	가지
+87	選ぶ	えらぶ	고르다. 뽑다. 선택하다
+88	遠慮	えんりょ	사양. 겸손
+89	御-	お-	경어 접두사. 주로 고유어 앞에 붙음
+90	オートバイ	オートバイ	오토바이
+91	おかえりなさい	おかえりなさい	가족이 집에 돌아왔을 때 하는 말. 어서 와요
+92	おかげ	おかげ	덕분
+93	おかしい	おかしい	웃기다. 이상하다
+94	億	おく	억
+95	屋上	おくじょう	옥상
+96	贈(り)物	おくりもの	선물
+97	送る	おくる	보내다. 부치다. 바래다주다
+98	遅れる	おくれる	늦다. 늦어지다
+99	起こす	おこす	일으키다
+100	怒る	おこる	화내다
+101	おじ	おじ	아저씨. 삼촌
+102	押し入れ	おしいれ	벽장
+103	お邪魔します	おじゃまします	남의 집에 들어갈 때 하는 말. 실례합니다
+104	お宅	おたく	상대방 집의 높임말. 댁
+105	落ちる	おちる	떨어지다
+106	おっしゃる	おっしゃる	言う의 높임말. 말씀하시다
+107	夫	おっと	남편
+108	音	おと	소리
+109	落とし物	おとしもの	빠뜨린 물건. 분실물. 유실물
+110	落とす	おとす	떨어뜨리다
+111	おとなしい	おとなしい	떠들거나 장난하지 않고 조용하다. 얌전하다
+112	踊り	おどり	춤. 무용
+113	踊る	おどる	춤추다
+114	驚く	おどろく	놀라다
+115	おば	おば	아주머니
+116	お久しぶりです	おひさしぶりです	오래간만입니다
+117	お前	おまえ	너
+118	お祭(り)	おまつり	축제 ＝まつり
+119	おめでとうございます	おめでとうございます	축하합니다
+120	お目にかかる	おめにかかる	会う의 낮춤말. 만나뵙다
+121	思い出す	おもいだす	-를 생각해 내다. 상기하다. 떠올리다
+122	おもちゃ	おもちゃ	장난감. 완구
+123	表	おもて	표면. 겉
+124	お休みになる	おやすみになる	寝る・休む의 높임말. 주무시다. 쉬시다
+125	お湯	おゆ	뜨거운 물. 끓인 물
+126	おる	おる	いる의 낮춤말. 있다
+127	折る	おる	접다. 꺾다. 부러뜨리다
+128	俺	おれ	남자의 자칭. 나
+129	折れる	おれる	접히다. 꺾어지다. 부러지다
+130	終わり	おわり	끝. 마지막
+131	カーテン	カーテン	커튼
+132	会	かい	모임. 단체. -회
+133	-回	かい	-회. -번 (횟수)
+134	-階	かい	-층
+135	海岸	かいがん	해안. 바닷가
+136	会議	かいぎ	회의
+137	会場	かいじょう	회장. 모임 장소
+138	外部	がいぶ	외부
+139	会話	かいわ	회화
+140	飼う	かう	(동물을) 기르다. 키우다
+141	帰り	かえり	돌아가는 길. 귀가
+142	変える	かえる	바꾸다
+143	科学	かがく	과학
+144	鏡	かがみ	거울
+145	掛ける	かける	걸다. 늘어뜨리다. 달다. 잠그다
+146	飾り	かざり	꾸밈. 장식
+147	飾る	かざる	장식하다. 꾸미다
+148	火事	かじ	화재. 불
+149	かしこまりました	かしこまりました	잘 알겠습니다
+150	歌手	かしゅ	가수
+151	ガス	ガス	가스
+152	ガソリン	ガソリン	휘발유
+153	ガソリンスタンド	ガソリンスタンド	주유소
+154	肩	かた	어깨
+155	-方	かた	(-하는)방법
+156	方	かた	분(ひと의 높임말)
+157	堅い	かたい	딱딱하다. 굳다. 단단하다
+158	形	かたち	모양. 꼴
+159	片付ける	かたづける	치우다. 정돈하다
+160	勝つ	かつ	이기다. 승리하다
+161	かっこいい	かっこいい	멋있다
+162	格好	かっこう	모습. 꼴
+163	家庭	かてい	가정
+164	家内	かない	아내. 집사람 ＝つま
+165	悲しい	かなしい	슬프다
+166	必ず	かならず	반드시. 꼭
+167	かなり	かなり	꽤. 제법. 어지간히. 상당히
+168	金持ち	かねもち	부자. 재산가
+169	彼女	かのじょ	그녀. 여자친구
+170	壁	かべ	벽
+171	髪	かみ	머리카락
+172	通う	かよう	다니다
+173	ガラス	ガラス	유리
+174	がる	がる	형용사를 동사로 바꾸는 접사. …어하다
+175	彼	かれ	그이. 그 남자
+176	カレー	カレー	카레
+177	彼氏	かれし	남자친구
+178	彼ら	かれら	그들. 그 사람들
+179	-側	がわ	-쪽. -측
+180	乾く	かわく	마르다. 건조해지다
+181	代わり	かわり	(누구+)대신
+182	変わる	かわる	바뀌다
+183	考える	かんがえる	생각하다. 고안하다
+184	関係	かんけい	관계
+185	観光	かんこう	관광
+186	簡単な	かんたんな	간단한
+187	頑張る	がんばる	열심히 하다. 노력하다
+188	気	き	기. 기력. 기운. 느낌
+189	機会	きかい	기회
+190	機械	きかい	기계
+191	期間	きかん	기간
+192	聞き取り	ききとり	듣기. 청취
+193	危険な	きけんな	위험한
+194	聞こえる	きこえる	들리다
+195	汽車	きしゃ	기차
+196	記者	きしゃ	기자
+197	技術	ぎじゅつ	기술
+198	季節	きせつ	계절
+199	規則	きそく	규칙
+200	きっと	きっと	(미래에) 꼭 (+…할 것이다)
+201	気に入る	きにいる	(1G) 마음에 들다
+202	厳しい	きびしい	엄하다. 엄격하다
+203	気分	きぶん	기분
+204	決まる	きまる	정해지다. 결정되다
+205	君	きみ	자네. 너
+206	決める	きめる	정하다. 결정하다
+207	気持ち	きもち	마음. 기분
+208	着物	きもの	일본 전통옷
+209	客	きゃく	손님
+210	急行	きゅうこう	급행(열차)
+211	教育	きょういく	교육
+212	教会	きょうかい	교회
+213	興味	きょうみ	흥미. 관심
+214	切る	きる	(1G) 자르다. 베다. 끊다
+215	キロ	キロ	킬로
+216	近所	きんじょ	근처. 이웃집
+217	具合	ぐあい	(몸)상태. 형편
+218	空気	くうき	공기
+219	空港	くうこう	공항
+220	草	くさ	풀
+221	下さい	ください	주세요
+222	下さる	くださる	くれる의 높임말. (나에게) 주시다
+223	首	くび	목
+224	雲	くも	구름
+225	曇(り)	くもり	흐림
+226	曇る	くもる	흐리다. 흐려지다
+227	比べる	くらべる	비교하다
+228	グラム	グラム	그램
+229	苦しい	くるしい	괴롭다. 고통스럽다
+230	くれる	くれる	(나에게) 주다
+231	暮れる	くれる	(날이) 저물다. (해가) 지다
+232	-君	くん	-군 (호칭)
+233	毛	け	털
+234	計画	けいかく	계획
+235	経験	けいけん	경험
+236	経済	けいざい	경제
+237	警察	けいさつ	경찰
+238	ケーキ	ケーキ	케이크
+239	ゲーム	ゲーム	게임
+240	怪我	けが	상처. 부상
+241	景色	けしき	경치. 풍경
+242	消しゴム	けしゴム	지우개
+243	下宿	げしゅく	하숙. 자취
+244	結構です	けっこうです	거절할 때 쓰는 말. 됐습니다
+245	決して	けっして	결코. 절대로
+246	欠席	けっせき	결석
+247	けれども	けれども	하지만. 그렇지만
+248	-軒	けん	-채 (집을 세는 단위)
+249	原因	げんいん	원인
+250	喧嘩	けんか	싸움
+251	玄関	げんかん	현관
+252	研究	けんきゅう	연구
+253	見物	けんぶつ	구경
+254	-個	こ	-개
+255	御-	ご-	경어 접두사. 주로 한자어 앞에 붙음
+256	子	こ	아이
+257	こう	こう	이렇게
+258	郊外	こうがい	교외
+259	講義	こうぎ	강의
+260	工業	こうぎょう	공업
+261	高校	こうこう	고등학교
+262	交差点	こうさてん	교차로. 네거리
+263	工事	こうじ	공사
+264	工場	こうじょう	공장
+265	校長	こうちょう	교장
+266	交通	こうつう	교통
+267	講堂	こうどう	강당
+268	公務員	こうむいん	공무원
+269	氷	こおり	얼음
+270	国際	こくさい	국제
+271	国産	こくさん	국산
+272	国民	こくみん	국민
+273	国立	こくりつ	국립
+274	心	こころ	마음
+275	故障	こしょう	고장
+276	個人	こじん	개인
+277	ご存知だ	ごぞんじだ	知っている의 높임말. 알고 계시다
+278	答(え)	こたえ	대답. 정답. 답안
+279	御馳走	ごちそう	손님을 대접함. 진수성찬
+280	こっち	こっち	이쪽
+281	事	こと	일. 것. 사항. 사실
+282	言葉	ことば	말. 언어
+283	小鳥	ことり	작은 새
+284	この間	このあいだ	그 전에. 예전에
+285	この頃	このごろ	요즘
+286	細かい	こまかい	잘다. 작다. 미세하다
+287	ごみ	ごみ	쓰레기. 티끌. 먼지
+288	込む	こむ	혼잡하다. 붐비다
+289	米	こめ	쌀
+290	ご覧になる	ごらんになる	見る의 높임말. 보시다
+291	これから	これから	이제부터. 앞으로
+292	転ぶ	ころぶ	넘어지다
+293	怖い	こわい	무섭다. 두렵다
+294	壊す	こわす	망가뜨리다. 부수다. 무너뜨리다
+295	壊れる	こわれる	망가지다. 부서지다. 무너지다
+296	今回	こんかい	이번
+297	コンサート	コンサート	콘서트
+298	今度	こんど	이번. 이 다음
+299	こんなに	こんなに	이렇게(도). 이렇게(까지)
+300	コンピューター	コンピューター	컴퓨터
+301	今夜	こんや	오늘 밤
+302	最近	さいきん	최근. 요즘
+303	最後	さいご	최후. 마지막. 맨 뒤
+304	最初	さいしょ	최초. 처음
+305	サイン	サイン	사인
+306	坂	さか	비탈길. 고개
+307	探す	さがす	찾다
+308	盛んな	さかんな	성행한
+309	作品	さくひん	작품
+310	桜	さくら	벚나무. 벚꽃
+311	差し上げる	さしあげる	あげる의 낮춤말. 드리다
+312	差す	さす	(우산을) 쓰다. (햇볕이) 비치다
+313	させる	させる	시키다. 하게 만들다
+314	さっき	さっき	아까. 조금 전에
+315	寂しい	さびしい	외롭다. 쓸쓸하다
+316	-様	さま	-님
+317	サラダ	サラダ	샐러드
+318	される	される	する의 수동형. 당하다. 받다. 되다
+319	騒ぐ	さわぐ	떠들다
+320	触る	さわる	만지다. 손을 대다
+321	産業	さんぎょう	산업
+322	算数	さんすう	산수. 초등 수학
+323	賛成	さんせい	찬성
+324	サンダル	サンダル	샌들
+325	サンドイッチ	サンドイッチ	샌드위치
+326	残念な	ざんねんな	유감스러운. 아쉬운
+327	市	し	시. 도시
+328	字	じ	글자. 글씨
+329	試合	しあい	경기. 시합
+330	しかし	しかし	그러나
+331	仕方	しかた	하는 방법. 수단
+332	仕方ない	しかたない	어쩔 수 없다. 할 수 없다
+333	叱る	しかる	야단치다. 꾸짖다
+334	試験	しけん	시험
+335	事故	じこ	사고
+336	地震	じしん	지진
+337	舌	した	혀
+338	時代	じだい	시대
+339	したがる	したがる	하고 싶어하다
+340	下着	したぎ	속옷. 내의
+341	支度	したく	채비. 준비
+342	親しい	したしい	친하다. 사이가 좋다
+343	しっかり	しっかり	단단히. 꼭. 똑똑히. 정신 차려서. 확
+344	失敗	しっぱい	실패
+345	質問	しつもん	질문
+346	失礼	しつれい	실례
+347	辞典	じてん	사전
+348	自転車	じてんしゃ	자전거
+349	自動	じどう	자동
+350	自動車	じどうしゃ	자동차
+351	品物	しなもの	물품. 상품
+352	支払(い)	しはらい	지불. 지급
+353	自分	じぶん	자기. 자신
+354	島	しま	섬
+355	姉妹	しまい	자매
+356	しまう	しまう	끝마치다. 치우다. 안에 넣다. …해 버리다
+357	市民	しみん	시민
+358	事務所	じむしょ	사무소
+359	じゃ(あ)	じゃ(あ)	그럼 ＝では
+360	社会	しゃかい	사회
+361	社長	しゃちょう	사장
+362	邪魔	じゃま	방해. 장애
+363	邪魔な	じゃまな	방해가 되는. 귀찮은
+364	ジャム	ジャム	잼
+365	自由	じゆう	자유
+366	-中	じゅう	온-. -내내 (장소 기간 전체에)
+367	習慣	しゅうかん	습관
+368	週間	しゅうかん	주간
+369	住所	じゅうしょ	주소
+370	ジュース	ジュース	주스
+371	柔道	じゅうどう	유도
+372	自由な	じゆうな	자유로운
+373	十分	じゅうぶん	충분히
+374	十分な	じゅうぶんな	충분한
+375	授業	じゅぎょう	수업
+376	主人	しゅじん	주인. 남편
+377	出席	しゅっせき	출석
+378	出発	しゅっぱつ	출발
+379	趣味	しゅみ	취미
+380	準備	じゅんび	준비
+381	-場	じょう/-ば	-장 (장소)
+382	紹介	しょうかい	소개
+383	正月	しょうがつ	정월. 설날
+384	小学校	しょうがっこう	소학교. 초등학교
+385	小説	しょうせつ	소설
+386	招待	しょうたい	초대. 초청
+387	醬油	しょうゆ	간장
+388	将来	しょうらい	장래. 미래
+389	食事	しょくじ	식사
+390	食料品	しょくりょうひん	식료품
+391	女性	じょせい	여성
+392	知らせる	しらせる	알리다
+393	調べる	しらべる	알아보다. 조사하다
+394	人口	じんこう	인구
+395	神社	じんじゃ	신사
+396	心配	しんぱい	걱정. 근심
+397	心配な	しんぱいな	걱정스러운
+398	水泳	すいえい	수영
+399	水道	すいどう	수도
+400	ずいぶん	ずいぶん	몹시. 상당히. 충분히. 너무
+401	数学	すうがく	수학
+402	スーツ	スーツ	슈트. 정장
+403	スーツケース	スーツケース	여행용 가방
+404	スーパー	スーパー	슈퍼
+405	すぎる	すぎる	(ます형+) 너무 …하다. 지나치게 …하다
+406	過ぎる	すぎる	지나다. 통과하다
+407	空く	すく	틈이 나다. 짬이 나다. 속이 비다
+408	すぐに	すぐに	곧. 즉시. 곧바로
+409	すごい	すごい	굉장하다. 대단하다
+410	進む	すすむ	앞으로 가다. 나아가다
+411	すっかり	すっかり	죄다. 모두. 완전히
+412	ずっと	ずっと	훨씬. 매우. 쭉. 계속
+413	捨てる	すてる	버리다
+414	ステレオ	ステレオ	스테레오
+415	砂	すな	모래
+416	素晴らしい	すばらしい	훌륭하다. 근사하다. 굉장하다
+417	スピーカー	スピーカー	스피커
+418	スピーチ	スピーチ	스피치
+419	滑る	すべる	미끄러지다
+420	すり	すり	소매치기
+421	スリッパ	スリッパ	슬리퍼
+422	すると	すると	그러자. 그렇다면
+423	-製	せい	-제 (만든 재료 회사명 국명을 나타내는 말)
+424	生活	せいかつ	생활
+425	生産	せいさん	생산
+426	政治	せいじ	정치
+427	世界	せかい	세계
+428	席	せき	자리. 좌석
+429	セット	セット	세트
+430	説明	せつめい	설명
+431	背中	せなか	등
+432	是非	ぜひ	꼭 (+…하고 싶다 +…해주세요)
+433	背広	せびろ	신사복
+434	世話	せわ	도와줌. 보살핌. 소개함. 폐. 신세
+435	線	せん	선
+436	全国	ぜんこく	전국
+437	選手	せんしゅ	선수
+438	全然	ぜんぜん	전혀
+439	戦争	せんそう	전쟁
+440	全体	ぜんたい	전체
+441	洗濯	せんたく	세탁. 빨래
+442	全部	ぜんぶ	전부. 모두
+443	専門	せんもん	전문. 전공
+444	そう	そう	그렇게
+445	掃除	そうじ	청소
+446	そうして	そうして	그리하여. 그리고나서
+447	相談	そうだん	상담. 상의. 의논
+448	そして	そして	그리고
+449	育てる	そだてる	키우다. 기르다. 양육하다
+450	卒業	そつぎょう	졸업
+451	そっち	そっち	그쪽
+452	祖父	そふ	(나의)할아버지
+453	ソフト	ソフト	소프트
+454	祖母	そぼ	(나의)할머니
+455	それから	それから	그 다음에. 그리고. 그리고 나서
+456	それで	それで	그래서
+457	それでは	それでは	그러면. 그렇다면
+458	それに	それに	게다가
+459	それ程	それほど	그다지. 그만큼
+460	そろそろ	そろそろ	시간이 다 되어가는 모양. 슬슬. 이제
+461	存じる	ぞんじる	知っている의 낮춤말. 알다. 알고 있다
+462	そんなに	そんなに	그렇게(도). 그렇게(까지)
+463	-台	だい	-대
+464	退院	たいいん	퇴원
+465	大使館	たいしかん	대사관
+466	大事な	だいじな	중요한
+467	大切な	たいせつな	중요한. 소중한
+468	大体	だいたい	대체적으로. 대개. 대충
+469	大抵	たいてい	대개. 대부분
+470	タイプ	タイプ	타입. 타이프
+471	大分	だいぶ	어지간히. 상당히. 꽤
+472	台風	たいふう	태풍
+473	倒す	たおす	쓰러뜨리다
+474	倒れる	たおれる	쓰러지다. 자빠지다
+475	だから	だから	그렇기 때문에. 그래서. 그러니까
+476	竹	たけ	대나무
+477	確かな	たしかな	확실한. 틀림없는
+478	足す	たす	더하다. 보태다. 추가하다
+479	訪ねる	たずねる	찾아가다. 방문하다
+480	ただいま	ただいま	다녀왔습니다
+481	只今	ただいま	지금. 현재 (격식을 차린 말)
+482	正しい	ただしい	옳다. 바르다. 맞다
+483	畳	たたみ	다다미
+484	-達	たち	-들
+485	建つ	たつ	(건물이) 세워지다
+486	縦	たて	세로
+487	建てる	たてる	(건물을) 세우다. 짓다. 건축하다
+488	例えば	たとえば	예를 들면. 예컨대
+489	棚	たな	선반
+490	楽しみ	たのしみ	즐거움. 낙. 기대
+491	頼む	たのむ	부탁하다
+492	多分	たぶん	아마
+493	たまに	たまに	드물게. 어쩌다가. 때로는
+494	ため(に)	ため(に)	(목적)-를 위하여. (이유)-때문에
+495	だめな	だめな	안되는
+496	足りない	たりない	모자라다. 부족하다
+497	足りる	たりる	족하다. 충분하다
+498	誰か	だれか	누군가
+499	誰も	だれも	아무도 (+부정문)
+500	ダンス	ダンス	댄스
+501	男性	だんせい	남성
+502	血	ち	피
+503	違う	ちがう	다르다. 틀리다. 잘못되다
+504	力	ちから	힘
+505	地図	ちず	지도
+506	父親	ちちおや	부친
+507	ちっとも	ちっとも	조금도. 전혀
+508	茶色	ちゃいろ	갈색
+509	茶わん	ちゃわん	찻종. 밥공기
+510	ちゃん	ちゃん	친근감을 주는 호칭
+511	-中	ちゅう	-중 (장소 내에. 기간 중에. 진행중)
+512	注意	ちゅうい	주의. 조심
+513	中学校	ちゅうがっこう	중학교
+514	中止	ちゅうし	중지. 취소
+515	駐車	ちゅうしゃ	주차
+516	ちょうど	ちょうど	꼭. 정확히. 딱. 마치. 마침. 알맞게
+517	地理	ちり	지리
+518	捕まえる	つかまえる	붙잡다. 붙들다
+519	疲れる	つかれる	지치다. 피로해지다
+520	月	つき	달
+521	着く	つく	닿다. 도착하다
+522	付く	つく	붙다. 묻다. (전깃불이) 켜지다
+523	付ける	つける	붙이다. (전깃불을) 켜다
+524	都合	つごう	형편
+525	伝える	つたえる	전하다
+526	続く	つづく	계속되다
+527	続ける	つづける	계속하다
+528	包む	つつむ	싸다. 포장하다
+529	勤める	つとめる	근무하다. 종사하다
+530	妻	つま	아내
+531	つまらない	つまらない	재미없다. 하찮다. 시시하다
+532	爪	つめ	손톱. 발톱
+533	冷たい	つめたい	차갑다. 차다. 냉정하다
+534	積もる	つもる	쌓이다
+535	梅雨	つゆ	장마
+536	釣る	つる	낚다
+537	連れて行く	つれていく	데리고 가다
+538	連れて来る	つれてくる	데리고 오다
+539	丁寧な	ていねいな	정중한
+540	テープレコーダー	テープレコーダー	테이프 레코더. 녹음기
+541	出掛ける	でかける	외출하다. 집밖으로 나가다
+542	テキスト	テキスト	텍스트
+543	できる	できる	생기다
+544	できる	できる	할 수 있다. 할 줄 알다. 가능하다
+545	できるだけ	できるだけ	가능한 한. 되도록
+546	手伝う	てつだう	도와주다
+547	テニス	テニス	테니스
+548	では	では	그러면. 그럼
+549	手袋	てぶくろ	장갑
+550	でも	でも	하지만. 그래도
+551	手元	てもと	손이 미치는 범위. 자기 주위
+552	寺	てら	절
+553	点	てん	점 (point)
+554	店員	てんいん	점원
+555	天気予報	てんきよほう	일기 예보
+556	展覧会	てんらんかい	전람회
+557	戸	と	문짝. 문. 도어
+558	-度	ど	-도. -번 (온도 각도 횟수 등)
+559	道具	どうぐ	도구
+560	とうとう	とうとう	드디어. 결국. 마침내
+561	動物園	どうぶつえん	동물원
+562	遠く	とおく	먼 곳. 멀리
+563	通り	とおり	큰길. 도로
+564	通る	とおる	통과하다. 지나가다
+565	時	とき	때
+566	特に	とくに	특히. 특별히
+567	特別な	とくべつな	특별한
+568	どこか	どこか	어딘가
+569	どこにも	どこにも	아무데도 (+부정문)
+570	床屋	とこや	이발소 또는 이발사
+571	都市	とし	도시
+572	途中	とちゅう	도중
+573	特急	とっきゅう	특급
+574	どっち	どっち	어느쪽
+575	届く	とどく	닿다. 달하다. 배달되다
+576	届ける	とどける	닿게 하다. 보내주다. 배달하다. 신고하다
+577	止まる	とまる	멈추다. 정지하다. 서다
+578	泊まる	とまる	묵다. 숙박하다
+579	止める	とめる	멈추게 하다. 정지시키다. 세우다
+580	泊める	とめる	숙박시키다. 재우다
+581	トラック	トラック	트럭
+582	ドラマ	ドラマ	드라마
+583	取り替える	とりかえる	바꾸다. 교환하다. 갈다
+584	取る	とる	(손에) 잡다. 들다. 쥐다
+585	ドレス	ドレス	드레스
+586	泥棒	どろぼう	도둑질 또는 도둑
+587	どんどん	どんどん	일이 순조롭게 진척되는 모양. 자꾸. 계속
+588	内部	ないぶ	내부
+589	直す	なおす	고치다. 바로잡다. 수리하다
+590	直る	なおる	고쳐지다. 치료되다. 낫다
+591	流す	ながす	흘리다
+592	なかなか	なかなか	제법. 꽤. 좀처럼
+593	流れる	ながれる	흐르다
+594	泣く	なく	울다
+595	鳴く	なく	(동물 등이) 소리를 내어 울다
+596	無くす	なくす	없애다. 잃다
+597	亡くなる	なくなる	죽다. 돌아가시다
+598	無くなる	なくなる	없어지다. 다 떨어지다
+599	投げる	なげる	던지다
+600	なさる	なさる	する의 높임말. 하시다
+601	等	など	등. 따위
+602	何か	なにか	무엇인가
+603	何も	なにも	아무것도 (+부정문)
+604	並ぶ	ならぶ	한 줄로 서다. 배열되다
+605	並べる	ならべる	늘어놓다. 나란히 세우다
+606	なる	なる	…이 되다
+607	鳴る	なる	소리가 나다. 울리다
+608	なるべく	なるべく	될 수 있는 한. 가능한 한. 되도록
+609	なるほど	なるほど	정말. 과연 (그렇군요)
+610	慣れる	なれる	익숙해지다
+611	似合う	にあう	잘 맞다. 어울리다
+612	匂い	におい	냄새
+613	苦い	にがい	(맛이) 쓰다
+614	にくい	にくい	(ます형+) -하기 어렵다. -하기 힘들다
+615	逃げる	にげる	도망치다. 달아나다
+616	日記	にっき	일기
+617	荷物	にもつ	짐
+618	入院	にゅういん	입원
+619	入学	にゅうがく	입학
+620	入社	にゅうしゃ	입사
+621	ニュース	ニュース	뉴스
+622	似る	にる	닮다. 비슷하다
+623	人形	にんぎょう	인형
+624	脱ぐ	ぬぐ	벗다
+625	盗む	ぬすむ	훔치다
+626	塗る	ぬる	바르다. 칠하다
+627	ぬるい	ぬるい	미지근하다
+628	濡れる	ぬれる	젖다
+629	願う	ねがう	원하다. 바라다
+630	値段	ねだん	값. 가격
+631	熱	ねつ	열
+632	寝坊	ねぼう	늦잠을 잠
+633	眠い	ねむい	졸리다
+634	眠たい	ねむたい	졸리다
+635	眠る	ねむる	잠자다. 잠들다
+636	年代	ねんだい	연대
+637	残す	のこす	남기다
+638	残る	のこる	남다 (어떤 기준 이하로 남다)
+639	喉	のど	목구멍
+640	乗り換え	のりかえ	갈아탐. 환승
+641	乗り換える	のりかえる	갈아타다. 환승하다
+642	乗り物	のりもの	탈것. 대중교통
+643	歯	は	이
+644	葉	は	잎
+645	場合	ばあい	경우
+646	パーティー	パーティー	파티
+647	-杯	はい	-잔
+648	-倍	ばい	-배. 갑절
+649	拝見する	はいけんする	見る의 낮춤말. 보다
+650	歯医者	はいしゃ	치과 의사
+651	ばかり	ばかり	(안좋은 것)만. -한 지 얼마 안됐음
+652	バケツ	バケツ	양동이
+653	箱	はこ	상자
+654	運ぶ	はこぶ	운반하다. 옮기다. 나르다
+655	橋	はし	다리
+656	始まり	はじまり	시작. 시초
+657	初めて	はじめて	처음으로. 비로소
+658	始める	はじめる	시작하다
+659	場所	ばしょ	장소. 곳
+660	走る	はしる	(1G) 달리다
+661	はず	はず	(강한 추측) 꼭 -할 터이다. -할 리(+가 없다)
+662	恥ずかしい	はずかしい	부끄럽다. 창피하다
+663	バター	バター	버터
+664	働く	はたらく	일하다. 근무하다
+665	発音	はつおん	발음
+666	はっきり	はっきり	똑똑히. 명확히
+667	花見	はなみ	꽃구경. 꽃놀이
+668	羽	はね	날개. 새털. 깃
+669	母親	ははおや	모친
+670	林	はやし	수풀. 숲
+671	払う	はらう	(돈을) 지불하다
+672	はる	はる	(종이 등을) 붙이다
+673	晴れ	はれ	하늘이 갬. 날씨가 좋음
+674	晴れる	はれる	(날씨가) 개다
+675	晩	ばん	밤
+676	-番	ばん	-번 (번호)
+677	番	ばん	순서. 차례 (your turn)
+678	番組	ばんぐみ	방송 프로그램
+679	反対	はんたい	반대
+680	半分	はんぶん	절반. 반
+681	火	ひ	불
+682	日	ひ	해. 태양. 햇빛. 햇볕
+683	ピアノ	ピアノ	피아노
+684	ビール	ビール	맥주
+685	冷える	ひえる	차가워지다. 식다
+686	光	ひかり	빛
+687	光る	ひかる	빛나다. 번쩍이다
+688	-匹	ひき	-마리
+689	引き出し	ひきだし	서랍. 인출
+690	引く	ひく	끌다. 잡아당기다
+691	弾く	ひく	악기를 연주하다. 치다. 켜다. 타다
+692	ピクニック	ピクニック	피크닉. 소풍
+693	ひげ	ひげ	수염
+694	美術館	びじゅつかん	미술관
+695	びっくり	びっくり	깜짝 놀람
+696	引っ越す	ひっこす	이사하다
+697	必要な	ひつような	필요한
+698	ひどい	ひどい	심하다. 가혹하다. 호되다. 지독하다
+699	一月	ひとつき	한 달. 1개월
+700	-秒	びょう	-초
+701	昼間	ひるま	낮동안
+702	昼休み	ひるやすみ	점심 시간. 점심 후의 휴식
+703	拾う	ひろう	줍다
+704	広さ	ひろさ	넓이
+705	ピンク	ピンク	핑크. 분홍색
+706	フィルム	フィルム	필름
+707	封筒	ふうとう	봉투
+708	プール	プール	풀장. 수영장
+709	増える	ふえる	늘어나다. 증가되다
+710	フォーク	フォーク	포크
+711	深い	ふかい	깊다
+712	吹く	ふく	불다
+713	複雑な	ふくざつな	복잡한
+714	復習	ふくしゅう	복습
+715	普通	ふつう	보통
+716	ぶつかる	ぶつかる	부딪히다. 충돌하다
+717	太い	ふとい	굵다
+718	葡萄	ぶどう	포도
+719	太る	ふとる	살찌다
+720	布団	ふとん	이부자리. 이불
+721	船	ふね	배
+722	不便な	ふべんな	불편한
+723	踏む	ふむ	밟다
+724	プリント	プリント	프린트
+725	プレゼント	プレゼント	선물
+726	文化	ぶんか	문화
+727	文学	ぶんがく	문학
+728	文書	ぶんしょ	문서
+729	文章	ぶんしょう	문장
+730	文法	ぶんぽう	문법
+731	ページ	ページ	페이지
+732	ベッド	ベッド	침대
+733	別に	べつに	따로. 별개로. 별로
+734	別の	べつの	또다른. 별개의
+735	ベル	ベル	벨. 종
+736	減る	へる	(1G) 줄어들다. 감소되다
+737	辺	へん	근처. 부근. 정도
+738	返事	へんじ	대답. 답장. 응답
+739	弁当	べんとう	도시락
+740	変な	へんな	이상한
+741	貿易	ぼうえき	무역
+742	放送	ほうそう	방송
+743	法律	ほうりつ	법률
+744	ボート	ボート	보트
+745	ボール	ボール	볼. 공
+746	僕	ぼく	남자의 자칭. 나
+747	星	ほし	별
+748	ポスト	ポスト	포스트. 우체통. 우편함. 지위. 직위
+749	細い	ほそい	가늘다
+750	程	ほど	정도. 만큼
+751	ほとんど	ほとんど	거의. 대부분
+752	骨	ほね	뼈
+753	ほめる	ほめる	칭찬하다
+754	本気	ほんき	본마음. 진심. 본정신
+755	本棚	ほんだな	책장
+756	本当	ほんとう	진실. 정말
+757	本当に	ほんとうに	정말로. 참으로
+758	参る	まいる	(1G) 行く・来る의 낮춤말. 가다. 오다
+759	負ける	まける	지다. 패하다
+760	孫	まご	손자
+761	真面目な	まじめな	성실한. 진지한
+762	まず	まず	우선. 먼저. 첫째로
+763	マスク	マスク	마스크
+764	または	または	또는. 혹은
+765	間違える	まちがえる	잘못하다. 틀리다. 다른 것으로 착각하다
+766	松	まつ	소나무
+767	マッチ	マッチ	성냥
+768	窓口	まどぐち	창구
+769	間に合う	まにあう	제시간에 도착하다. 지각하지 않다
+770	守る	まもる	지키다. 보호하다
+771	回る	まわる	돌다. 회전하다
+772	漫画	まんが	만화
+773	真ん中	まんなか	한가운데
+774	万年筆	まんねんひつ	만년필
+775	見える	みえる	보이다
+776	見付かる	みつかる	발견되다. 들키다
+777	見付ける	みつける	발견하다. 찾아내다
+778	港	みなと	항구
+779	向かい	むかい	맞은편
+780	迎える	むかえる	맞이하다. 마중하다
+781	昔	むかし	옛날. 예전
+782	向こう	むこう	건너편. 저편
+783	虫	むし	벌레. 곤충
+784	息子	むすこ	아들
+785	娘	むすめ	딸. 아가씨
+786	村	むら	마을. 촌
+787	無理な	むりな	무리한
+788	メートル	メートル	미터
+789	召し上がる	めしあがる	食べる・飲む의 높임말. 잡수시다. 드시다
+790	珍しい	めずらしい	드물다. 희귀하다
+791	申し上げる	もうしあげる	言う의 낮춤말. 말씀드리다. 보고를 올리다
+792	申す	もうす	言う의 낮춤말. 말씀드리다
+793	もし	もし	만약. 만일. 혹시
+794	勿論	もちろん	물론
+795	戻す	もどす	되돌리다
+796	戻る	もどる	되돌아가다
+797	もらう	もらう	받다. 얻다
+798	森	もり	수풀. 숲. 삼림
+799	-屋	や	그 직업을 가진 집 또는 사람. -가게. -쟁이. -꾼
+800	夜間	やかん	야간
+801	焼く	やく	굽다. 태우다
+802	約束	やくそく	약속
+803	役に立つ	やくにたつ	도움이 되다
+804	焼ける	やける	타다. 구워지다
+805	やすい	やすい	(ます형+) -하기 쉽다. -하기 편하다
+806	やせる	やせる	살이 빠지다
+807	やっと	やっと	겨우. 가까스로
+808	やっぱり	やっぱり	역시
+809	やはり	やはり	역시 ＝やっぱり
+810	やむ	やむ	(비가) 멈추다. 그치다
+811	やめる	やめる	그만두다. 중지하다. 끊다
+812	やる	やる	(아랫사람이나 동물 식물에게) 주다
+813	やる	やる	하다 ＝する
+814	柔らかい	やわらかい	부드럽다
+815	ゆうべ	ゆうべ	어제 저녁. 어젯밤
+816	有名な	ゆうめいな	유명한
+817	-行き	ゆき	-행
+818	輸出	ゆしゅつ	수출
+819	輸入	ゆにゅう	수입
+820	指	ゆび	손가락
+821	指輪	ゆびわ	반지
+822	夢	ゆめ	꿈
+823	揺れる	ゆれる	흔들리다
+824	酔い	よい	취함. 취기. 멀미
+825	用意	ようい	준비. 대비
+826	用事	ようじ	볼일. 용건
+827	汚れる	よごれる	더러워지다
+828	予習	よしゅう	예습
+829	予約	よやく	예약
+830	寄る	よる	들르다. 접근하다. 다가가다
+831	喜ぶ	よろこぶ	기뻐하다
+832	よろしい	よろしい	いい보다 더 공손한 말. 좋다
+833	立派な	りっぱな	훌륭한
+834	理由	りゆう	이유
+835	利用	りよう	이용
+836	両方	りょうほう	양쪽. 쌍방
+837	旅館	りょかん	여관
+838	旅行	りょこう	여행
+839	留守	るす	외출하고 집에 없음. 부재중
+840	零	れい	영. 제로
+841	冷蔵庫	れいぞうこ	냉장고
+842	冷房	れいぼう	냉방
+843	歴史	れきし	역사
+844	レコード	レコード	레코드. 기록
+845	列車	れっしゃ	열차
+846	レベル	レベル	레벨. 수준
+847	レポート	レポート	리포트. 보고서
+848	練習	れんしゅう	연습
+849	連絡	れんらく	연락
+850	廊下	ろうか	복도
+851	老人	ろうじん	노인
+852	ワイシャツ	ワイシャツ	와이셔츠
+853	若い	わかい	젊다
+854	沸かす	わかす	(물을) 끓이다
+855	別れる	わかれる	헤어지다. 이별하다
+856	沸く	わく	(물이) 끓다
+857	訳	わけ	뜻. 까닭. 사정
+858	わざと	わざと	일부러. 고의로
+859	わざわざ	わざわざ	일부러. 모처럼
+860	忘れ物	わすれもの	물건을 깜박 잊고 옴 또는 그 잊은 물건
+861	忘れる	わすれる	잊다. 잊어버리다
+862	私	わたくし	わたし보다 더 공손한 말. 저
+863	渡す	わたす	건네주다
+864	渡る	わたる	건너다. 건너가다
+865	笑う	わらう	웃다
+866	割る	わる	나누다. 깨뜨리다
+867	割れる	われる	갈라지다. 깨지다
+868	ワンピース	ワンピース	원피스`;
+    const N4_VOCAB_LEGACY_RAW = `1	科学	かがく (카가쿠)	과학
+2	後	あと (아토)	뒤, 후방
+3	棚	たな (타나)	선반
+4	橋	はし (하시)	다리
+5	米	こめ (코메)	쌀
+6	氷	こおり (코오리)	얼음
+7	壁	かべ (카베)	벽
+8	梅雨	つゆ (츠유)	장마
+9	空気	くうき (쿠우키)	공기
+10	羽	はね (하네)	날개
+11	辞典	じてん (지테)	사전
+12	三角形	さんかくけい (상카쿠케이)	삼각형
+13	ひげ	ひげ (히게)	수염
+14	星	ほし (호시)	별
+15	空間	くうかん (쿠우카)	공간
+16	油	あぶら (아부라)	기름
+17	池	いけ (이케)	연못
+18	色	いろ (이로)	색
+19	駅	えき (에키)	역
+20	お金	おかね (오카네)	돈
+21	飾り	かざり (카자리)	장식
+22	方	かた (카타)	쪽, 분
+23	花瓶	かびん (카비)	꽃병
+24	がらす	がらす (가라스)	유리
+25	切符	きっぷ (킷푸)	표
+26	曇り	くもり (쿠모리)	흐림
+27	けいと	けいと (케이토)	털실
+28	玄関	げんかん (게카)	현관
+29	ごみ	ごみ (고미)	쓰레기
+30	塩	しお (시오)	소금
+31	趣味	しゅみ (슈미)	취미
+32	水道	すいどう (스이도우)	수도
+33	数学	すうがく (스우가쿠)	수학
+34	洗濯	せんたく (세타쿠)	세탁
+35	台所	だいどころ (다이도코로)	부엌
+36	卓球	たっきゅう (타ㅋ큐우)	탁구
+37	地下鉄	ちかてつ (치카테츠)	지하철
+38	月	つき (츠키)	달
+39	電気	でんき (데키)	전기
+40	時計	とけい (토케이)	시계
+41	泥棒	どろぼう (도로보우)	도둑
+42	荷物	にもつ (니모츠)	짐
+43	葉書	はがき (하가키)	엽서
+44	袋	ふくろ (후쿠로)	봉투
+45	船	ふね (후네)	배
+46	文章	ぶんしょう (부쇼우)	문장
+47	窓	まど (마도)	창문
+48	道	みち (미치)	길
+49	指	ゆび (유비)	손가락
+50	都会	とかい (토카이)	도시
+51	区役所	くやくしょ (쿠야쿠쇼)	구청
+52	郵便局	ゆうびんきょく (유우비쿄쿠)	우체국
+53	国	くに (쿠니)	나라
+54	交番	こうばん (코우바)	파출소
+55	工場	こうじょう (코우조우)	공장
+56	屋根	やね (야네)	지붕
+57	背中	せなか (세나카)	등
+58	口	くち (쿠치)	입
+59	記者	きしゃ (키샤)	기자
+60	お姉さん	おねえさん (오네에상)	누나, 누님
+61	奥さん	おくさん (오쿠상)	(남의) 부인
+62	市民	しみん (시미)	시민
+63	腕	うで (우데)	팔, (실력/기술)
+64	祖父	そふ (소후)	조부 (할아버지)
+65	兄	あに (아니)	형
+66	姉	あね (아네)	누나
+67	お父さん	おとうさん (오토우상)	아버지
+68	弟	おとうと (오토우토)	남동생
+69	家族	かぞく (카조쿠)	가족
+70	兄弟	きょうだい (쿄우다이)	형제
+71	研究者	けんきゅうしゃ (케큐우샤)	연구자
+72	主人	しゅじん (슈지)	남편
+73	先生	せんせい (세세이)	선생님
+74	父	ちち (치치)	아버지 (자신의)
+75	息子	むすこ (무스코)	아들
+76	娘	むすめ (무스메)	딸
+77	経済	けいざい (케이자이)	경제
+78	専門	せんもん (세모)	전문
+79	発達	はったつ (하ㅌ타츠)	발달
+80	出発	しゅっぱつ (슈ㅃ파츠)	출발
+81	手続き	てつづき (테츠즈키)	수속, 절차
+82	表示	ひょうじ (효우지)	표시
+83	両方	りょうほう (료우호우)	양방
+84	日曜日	にちようび (니치요우비)	일요일
+85	試合	しあい (시아이)	시합
+86	入国	にゅうこく (뉴우코쿠)	입국
+87	半分	はんぶん (하부)	절반
+88	場合	ばあい (바아이)	경우
+89	案内	あんない (아나이)	안내
+90	笑顔	えがお (에가오)	웃는 얼굴
+91	乗り換え	のりかえ (노리카에)	갈아타기
+92	答え	こたえ (코타에)	대답, 해답
+93	お祭り	おまつり (오마츠리)	축제
+94	遊び	あそび (아소비)	놀이
+95	急行	きゅうこう (큐우코우)	급행 (열차)
+96	元気	げんき (게키)	원기, 기력
+97	招待	しょうたい (쇼우타이)	초대
+98	洋服	ようふく (요우후쿠)	양복
+99	夕飯	ゆうはん (유우하)	저녁밥
+100	管理	かんり (카리)	관리
+101	予習	よしゅう (요슈우)	예습
+102	先週	せんしゅう (세슈우)	지난주
+103	宿泊	しゅくはく (슈쿠하쿠)	숙박
+104	失礼	しつれい (시츠레이)	실례
+105	安全	あんぜん (아제)	안전
+106	会議	かいぎ (카이기)	회의
+107	経験	けいけん (케이케)	경험
+108	授業	じゅぎょう (주교우)	수업
+109	生活	せいかつ (세이카츠)	생활
+110	注意	ちゅうい (츄우이)	주의
+111	豚	ぶた (부타)	돼지
+112	返す	かえす (카에스)	돌려주다
+113	包む	つつむ (츠츠무)	싸다, 포장하다
+114	守る	まもる (마모루)	지키다
+115	引く	ひく (히쿠)	당기다, 끌다
+116	打つ	うつ (우츠)	치다
+117	瘦せる	やせる (야세루)	살이 빠지다
+118	着る	きる (키루)	(옷을) 입다
+119	渡す	わたす (와타스)	건네주다
+120	眠る	ねむる (네무루)	잠자다
+121	落とす	おとす (오토스)	떨어뜨리다
+122	驚く	おどろく (오도로쿠)	놀라다
+123	覚える	おぼえる (오보에루)	기억하다, 외우다
+124	足す	たす (타스)	더하다
+125	集める	あつめる (아츠메루)	모으다 (타동사)
+126	申し込む	もうしこむ (모우시코무)	신청하다
+127	帰る	かえる (카에루)	돌아가다, 돌아오다
+128	焼く	やく (야쿠)	굽다 (불에)
+129	叱る	しかる (시카루)	꾸짖다, 혼내다
+130	拾う	ひろう (히로우)	줍다
+131	減らす	へらす (헤라스)	줄이다 (타동사)
+132	飲む	のむ (노무)	마시다
+133	貼る	はる (하루)	붙이다
+134	別れる	わかれる (와카레루)	헤어지다
+135	無くす	なくす (나쿠스)	잃다, 없애다
+136	弾く	ひく (히쿠)	치다 (악기)
+137	曲がる	まがる (마가루)	(길을) 돌다
+138	掛ける	かける (카케루)	걸다
+139	決まる	きまる (키마루)	결정되다 (자동사)
+140	預かる	あずかる (아즈카루)	맡다, 보관하다
+141	上げる	あげる (아게루)	올리다, 주다
+142	集まる	あつまる (아츠마루)	모이다 (자동사)
+143	謝る	あやまる (아야마루)	사과하다
+144	押す	おす (오스)	누르다
+145	終わる	おわる (오와루)	끝나다 (자동사)
+146	降ろす	おろす (오로스)	내리다 (차/짐)
+147	飼う	かう (카우)	(동물을) 기르다
+148	数える	かぞえる (카조에루)	세다
+149	変わる	かわる (카와루)	변하다 (자동사)
+150	決める	きめる (키메루)	결정하다 (타동사)
+151	くれる	くれる (쿠레루)	(나에게) 주다
+152	探す	さがす (사가스)	찾다
+153	触る	さわる (사와루)	만지다
+154	閉める	しめる (시메루)	닫다 (타동사)
+155	捨てる	すてる (스테루)	버리다
+156	続ける	つづける (츠즈케루)	계속하다
+157	手伝う	てつだう (테츠다우)	돕다
+158	直す	なおす (나오스)	고치다 (타동사)
+159	習う	ならう (나라우)	배우다
+160	始まる	はじまる (하지마루)	시작되다 (자동사)
+161	運ぶ	はこぶ (하코부)	나르다, 운반하다
+162	増える	ふえる (후에루)	늘어나다 (자동사)
+163	褒める	ほめる (호메루)	칭찬하다
+164	間違える	まちがえる (마치가에루)	틀리다, 실수하다
+165	見える	みえる (미에루)	보이다 (자동사)
+166	もらう	もらう (모라우)	받다
+167	辞める	やめる (야메루)	그만두다
+168	呼ぶ	よぶ (요부)	부르다
+169	読める	よめる (요메루)	읽을 수 있다
+170	行ける	いける (이케루)	갈 수 있다
+171	出来る	できる (데키루)	할 수 있다
+172	言われる	いわれる (이와레루)	(말을) 듣다
+173	怒られる	おこられる (오코라레루)	화를 당하다
+174	褒められる	ほめられる (호메라레루)	칭찬을 받다
+175	使わす	つかわす (츠카와스)	시키다
+176	言わせる	いわせる (이와세루)	말하게 하다
+177	待たせる	またせる (마타세루)	기다리게 하다
+178	差し上げる	さしあげる (사시아게루)	드리다 (겸양어)
+179	頂く	いただく (이타다쿠)	받다 (겸양어)
+180	下さる	くださる (쿠다사루)	주시다 (존경어)
+181	安心する	あんしんする (아시스루)	안심하다
+182	運動する	うんどうする (우도우스루)	운동하다
+183	喧嘩する	けんかする (케카스루)	싸움하다
+184	失敗する	しっぱいする (시ㅃ파이스루)	실패하다
+185	説明する	せつめいする (세츠메이스루)	설명하다
+186	相談する	そうだんする (소우다스루)	상담하다
+187	通勤する	つうきんする (츠우키스루)	통근하다
+188	連れて行く	つれていく (츠레테이쿠)	데리고 가다
+189	伝言する	でんごんする (데고스루)	전언하다
+190	旅行する	りょこうする (료코우스루)	여행하다
+191	利用する	りようする (리요우스루)	이용하다
+192	不味い	まずい (마즈이)	맛없다
+193	若い	わかい (와카이)	젊다
+194	辛い	つらい (츠라이)	힘들다, 괴롭다
+195	苦い	にがい (니가이)	쓰다
+196	明るい	あかるい (아카루이)	밝다
+197	暖かい	あたたかい (아타타카이)	따뜻하다 (기온)
+198	暑い	あつい (아츠이)	덥다
+199	うまい	うまい (우마이)	맛있다, 잘하다
+200	可笑しい	おかしい (오카시이)	이상하다, 우습다
+201	重い	おもい (오모이)	무겁다
+202	硬い/固い	かたい (카타이)	딱딱하다, 단단하다
+203	黒い	くろい (쿠로이)	검다
+204	詳しい	くわしい (쿠와시이)	자세하다
+205	寒い	さむい (사무이)	춥다
+206	涼しい	すずしい (스즈시이)	시원하다
+207	小さい	ちいさい (치이사이)	작다
+208	長い	ながい (나가이)	길다
+209	早い	はやい (하야이)	빠르다 (시간)
+210	深い	ふかい (후카이)	깊다
+211	細い	ほそい (호소이)	가늘다
+212	貧しい	まずしい (마즈시이)	가난하다
+213	悪い	わるい (와루이)	나쁘다
+214	一般的	いっぱんてき (이ㅃ파테키)	일반적이다
+215	複雑な	ふくざつな (후쿠자츠나)	복잡하다
+216	安全な	あんぜんな (아제나)	안전하다
+217	綺麗	きれいな (키레이나)	예쁘다, 깨끗하다
+218	親切な	しんせつな (시세츠나)	친절하다
+219	大切な	たいせつな (타이세츠나)	중요하다
+220	不便な	ふべんな (후베나)	불편하다
+221	かなり	かなり (카나리)	제법, 상당히
+222	そのまま	そのまま (소노마마)	그대로
+223	どれ	どれ (도레)	어느 것 (대명사)
+224	とても	とても (토테모)	매우 (부사)
+225	それから	それから (소레카라)	그 다음에 (접속사)
+226	例えば	たとえば (타토에바)	예를 들면 (부사)
+227	だから	だから (다카라)	그러니까 (접속사)
+228	ずっと	ずっと (즈ㅌ토)	훨씬, 쭉
+229	偶に	たまに (타마니)	가끔
+230	段々	だんだん (다다)	점점
+231	直接	ちょくせつ (쵸쿠세츠)	직접
+232	特に	とくに (토쿠니)	특히
+233	なるべく	なるべく (나루베쿠)	되도록이면
+234	やっと	やっと (야ㅌ토)	드디어, 겨우
+235	やはり	やはり (야하리)	역시
+236	ゆっくり	ゆっくり (유ㅋ쿠리)	천천히
+237	わざと	わざと (와자토)	고의로, 일부러
+238	一所懸命	いっしょうけんめい (잇쇼우케메이)	진짜 열심히
+239	皆さん	みなさん (미나상)	여러분 (대명사)
+240	如何	いかが (이카가)	어떠십니까 (정중)
+241	お客様	おきゃくさま (오캬쿠사마)	손님 (경어)
+242	御馳走	ごちそう (고치소우)	진수성찬
+243	午前	ごぜん (고제)	오전
+244	午前中	ごぜんちゅう (고제츄우)	오전 중
+245	暫く	しばらく (시바라쿠)	잠시, 오랫동안
+246	自由	じゆう (지유우)	자유
+247	信号	しんごう (시고우)	신호
+248	全部	ぜんぶ (제부)	전부
+249	台風	たいふう (타이후우)	태풍
+250	できるだけ	できるだけ (데키루다케)	가능한 한
+251	本当	ほんとう (호토우)	사실`;
+    const N4_VOCAB_NEW_RAW = `1	ああ	ああ	저렇게
+2	あいさつ	あいさつ	인사
+3	アイロン	アイロン	다리미
+4	合う	あう	딱 맞다. 서로 …하다
+5	赤ちゃん	あかちゃん	아기
+6	空く	あく	비다
+7	アクセサリー	アクセサリー	액세서리
+8	あご	あご	턱
+9	浅い	あさい	얕다
+10	味	あじ	맛
+11	アジア	アジア	아시아
+12	明日	あす	내일(방송용어) ＝あした
+13	汗	あせ	땀
+14	厚い	あつい	두껍다. 두텁다
+15	熱い	あつい	뜨겁다
+16	あっち	あっち	저쪽
+17	アナウンサー	アナウンサー	아나운서
+18	アフリカ	アフリカ	아프리카
+19	飴	あめ	엿. 캔디
+20	アメリカ	アメリカ	미국
+21	アルコール	アルコール	알코올
+22	アルバイト	アルバイト	아르바이트
+23	安心	あんしん	안심
+24	あんなに	あんなに	저렇게(도). 저렇게(까지)
+25	以下	いか	이하
+26	以外	いがい	이외. 그 밖
+27	いかがですか	いかがですか	どうですか보다 공손한 말. 어떻습니까
+28	医学	いがく	의학
+29	生きる	いきる	삶을 살아가다. 생존하다
+30	意見	いけん	의견
+31	石	いし	돌
+32	いじめる	いじめる	괴롭히다
+33	以上	いじょう	이상
+34	急ぐ	いそぐ	서두르다
+35	致す	いたす	する의 낮춤말. 해드리다
+36	一々	いちいち	일일이. 하나하나
+37	一度	いちど	한번
+38	いつか	いつか	언젠가
+39	一体	いったい	도대체
+40	いってきます	いってきます	다녀오겠습니다
+41	いってらっしゃい	いってらっしゃい	다녀오세요
+42	一杯	いっぱい	가득. 한잔
+43	糸	いと	실
+44	以内	いない	이내
+45	田舎	いなか	시골
+46	命	いのち	목숨. 생명
+47	祈る	いのる	빌다. 기도하다
+48	居間	いま	거실
+49	いらっしゃる	いらっしゃる	行く・来る・いる의 높임말. 가시다. 오시다. 계시다
+50	祝う	いわう	축하하다. 축복하다
+51	植える	うえる	심다
+52	伺う	うかがう	聞く・訪ねる의 낮춤말. 여쭙다. 찾아뵙다
+53	受付	うけつけ	접수. 접수처
+54	受ける	うける	(추상적인 것을) 받다
+55	動かす	うごかす	-를 움직이다
+56	動く	うごく	-가 움직이다
+57	薄い	うすい	얇다. 엷다. 싱겁다
+58	嘘	うそ	거짓말
+59	うち	うち	저희(집). 우리(집)
+60	美しい	うつくしい	아름답다
+61	写す	うつす	베끼다. 묘사하다. (사진을) 찍다
+62	裏	うら	뒷면
+63	売(り)場	うりば	파는 곳. 매장
+64	うれしい	うれしい	기쁘다
+65	運	うん	운. 운수
+66	運転	うんてん	운전
+67	運転手	うんてんしゅ	운전 기사
+68	運動	うんどう	운동
+69	映画	えいが	영화
+70	営業	えいぎょう	영업
+71	ええ	ええ	네. 예
+72	エスカレーター	エスカレーター	에스컬레이터
+73	枝	えだ	가지
+74	選ぶ	えらぶ	고르다. 뽑다. 선택하다
+75	遠慮	えんりょ	사양. 겸손
+76	御-	お-	경어 접두사. 주로 고유어 앞에 붙음
+77	オートバイ	オートバイ	오토바이
+78	おかえりなさい	おかえりなさい	가족이 집에 돌아왔을 때 하는 말. 어서 와요
+79	おかげ	おかげ	덕분
+80	億	おく	억
+81	屋上	おくじょう	옥상
+82	贈(り)物	おくりもの	선물
+83	送る	おくる	보내다. 부치다. 바래다주다
+84	遅れる	おくれる	늦다. 늦어지다
+85	起こす	おこす	일으키다
+86	怒る	おこる	화내다
+87	おじ	おじ	아저씨. 삼촌
+88	押し入れ	おしいれ	벽장
+89	お邪魔します	おじゃまします	남의 집에 들어갈 때 하는 말. 실례합니다
+90	お宅	おたく	상대방 집의 높임말. 댁
+91	落ちる	おちる	떨어지다
+92	おっしゃる	おっしゃる	言う의 높임말. 말씀하시다
+93	夫	おっと	남편
+94	音	おと	소리
+95	落とし物	おとしもの	빠뜨린 물건. 분실물. 유실물
+96	おとなしい	おとなしい	떠들거나 장난하지 않고 조용하다. 얌전하다
+97	踊り	おどり	춤. 무용
+98	踊る	おどる	춤추다
+99	おば	おば	아주머니
+100	お久しぶりです	おひさしぶりです	오래간만입니다
+101	お前	おまえ	너
+102	おめでとうございます	おめでとうございます	축하합니다
+103	お目にかかる	おめにかかる	会う의 낮춤말. 만나뵙다
+104	思い出す	おもいだす	-를 생각해 내다. 상기하다. 떠올리다
+105	おもちゃ	おもちゃ	장난감. 완구
+106	表	おもて	표면. 겉
+107	お休みになる	おやすみになる	寝る・休む의 높임말. 주무시다. 쉬시다
+108	お湯	おゆ	뜨거운 물. 끓인 물
+109	おる	おる	いる의 낮춤말. 있다
+110	折る	おる	접다. 꺾다. 부러뜨리다
+111	俺	おれ	남자의 자칭. 나
+112	折れる	おれる	접히다. 꺾어지다. 부러지다
+113	終わり	おわり	끝. 마지막
+114	カーテン	カーテン	커튼
+115	会	かい	모임. 단체. -회
+116	-回	かい	-회. -번 (횟수)
+117	-階	かい	-층
+118	海岸	かいがん	해안. 바닷가
+119	会場	かいじょう	회장. 모임 장소
+120	外部	がいぶ	외부
+121	会話	かいわ	회화
+122	帰り	かえり	돌아가는 길. 귀가
+123	変える	かえる	바꾸다
+124	鏡	かがみ	거울
+125	飾る	かざる	장식하다. 꾸미다
+126	火事	かじ	화재. 불
+127	かしこまりました	かしこまりました	잘 알겠습니다
+128	歌手	かしゅ	가수
+129	ガス	ガス	가스
+130	ガソリン	ガソリン	휘발유
+131	ガソリンスタンド	ガソリンスタンド	주유소
+132	肩	かた	어깨
+133	-方	かた	(-하는)방법
+134	形	かたち	모양. 꼴
+135	片付ける	かたづける	치우다. 정돈하다
+136	勝つ	かつ	이기다. 승리하다
+137	かっこいい	かっこいい	멋있다
+138	格好	かっこう	모습. 꼴
+139	家庭	かてい	가정
+140	家内	かない	아내. 집사람 ＝つま
+141	悲しい	かなしい	슬프다
+142	必ず	かならず	반드시. 꼭
+143	金持ち	かねもち	부자. 재산가
+144	彼女	かのじょ	그녀. 여자친구
+145	髪	かみ	머리카락
+146	通う	かよう	다니다
+147	ガラス	ガラス	유리
+148	がる	がる	형용사를 동사로 바꾸는 접사. …어하다
+149	彼	かれ	그이. 그 남자
+150	カレー	カレー	카레
+151	彼氏	かれし	남자친구
+152	彼ら	かれら	그들. 그 사람들
+153	-側	がわ	-쪽. -측
+154	乾く	かわく	마르다. 건조해지다
+155	代わり	かわり	(누구+)대신
+156	考える	かんがえる	생각하다. 고안하다
+157	関係	かんけい	관계
+158	観光	かんこう	관광
+159	簡単な	かんたんな	간단한
+160	頑張る	がんばる	열심히 하다. 노력하다
+161	気	き	기. 기력. 기운. 느낌
+162	機会	きかい	기회
+163	機械	きかい	기계
+164	期間	きかん	기간
+165	聞き取り	ききとり	듣기. 청취
+166	危険な	きけんな	위험한
+167	聞こえる	きこえる	들리다
+168	汽車	きしゃ	기차
+169	技術	ぎじゅつ	기술
+170	季節	きせつ	계절
+171	規則	きそく	규칙
+172	きっと	きっと	(미래에) 꼭 (+…할 것이다)
+173	気に入る	きにいる	(1G) 마음에 들다
+174	厳しい	きびしい	엄하다. 엄격하다
+175	気分	きぶん	기분
+176	君	きみ	자네. 너
+177	気持ち	きもち	마음. 기분
+178	着物	きもの	일본 전통옷
+179	客	きゃく	손님
+180	教育	きょういく	교육
+181	教会	きょうかい	교회
+182	興味	きょうみ	흥미. 관심
+183	切る	きる	(1G) 자르다. 베다. 끊다
+184	キロ	キロ	킬로
+185	近所	きんじょ	근처. 이웃집
+186	具合	ぐあい	(몸)상태. 형편
+187	空港	くうこう	공항
+188	草	くさ	풀
+189	下さい	ください	주세요
+190	首	くび	목
+191	雲	くも	구름
+192	曇る	くもる	흐리다. 흐려지다
+193	比べる	くらべる	비교하다
+194	グラム	グラム	그램
+195	苦しい	くるしい	괴롭다. 고통스럽다
+196	暮れる	くれる	(날이) 저물다. (해가) 지다
+197	-君	くん	-군 (호칭)
+198	毛	け	털
+199	計画	けいかく	계획
+200	警察	けいさつ	경찰
+201	ケーキ	ケーキ	케이크
+202	ゲーム	ゲーム	게임
+203	怪我	けが	상처. 부상
+204	景色	けしき	경치. 풍경
+205	消しゴム	けしゴム	지우개
+206	下宿	げしゅく	하숙. 자취
+207	結構です	けっこうです	거절할 때 쓰는 말. 됐습니다
+208	決して	けっして	결코. 절대로
+209	欠席	けっせき	결석
+210	けれども	けれども	하지만. 그렇지만
+211	-軒	けん	-채 (집을 세는 단위)
+212	原因	げんいん	원인
+213	喧嘩	けんか	싸움
+214	研究	けんきゅう	연구
+215	見物	けんぶつ	구경
+216	-個	こ	-개
+217	御-	ご-	경어 접두사. 주로 한자어 앞에 붙음
+218	子	こ	아이
+219	こう	こう	이렇게
+220	郊外	こうがい	교외
+221	講義	こうぎ	강의
+222	工業	こうぎょう	공업
+223	高校	こうこう	고등학교
+224	交差点	こうさてん	교차로. 네거리
+225	工事	こうじ	공사
+226	校長	こうちょう	교장
+227	交通	こうつう	교통
+228	講堂	こうどう	강당
+229	公務員	こうむいん	공무원
+230	国際	こくさい	국제
+231	国産	こくさん	국산
+232	国民	こくみん	국민
+233	国立	こくりつ	국립
+234	心	こころ	마음
+235	故障	こしょう	고장
+236	個人	こじん	개인
+237	ご存知だ	ごぞんじだ	知っている의 높임말. 알고 계시다
+238	こっち	こっち	이쪽
+239	事	こと	일. 것. 사항. 사실
+240	言葉	ことば	말. 언어
+241	小鳥	ことり	작은 새
+242	この間	このあいだ	그 전에. 예전에
+243	この頃	このごろ	요즘
+244	細かい	こまかい	잘다. 작다. 미세하다
+245	込む	こむ	혼잡하다. 붐비다
+246	ご覧になる	ごらんになる	見る의 높임말. 보시다
+247	これから	これから	이제부터. 앞으로
+248	転ぶ	ころぶ	넘어지다
+249	怖い	こわい	무섭다. 두렵다
+250	壊す	こわす	망가뜨리다. 부수다. 무너뜨리다
+251	壊れる	こわれる	망가지다. 부서지다. 무너지다
+252	今回	こんかい	이번
+253	コンサート	コンサート	콘서트
+254	今度	こんど	이번. 이 다음
+255	こんなに	こんなに	이렇게(도). 이렇게(까지)
+256	コンピューター	コンピューター	컴퓨터
+257	今夜	こんや	오늘 밤
+258	最近	さいきん	최근. 요즘
+259	最後	さいご	최후. 마지막. 맨 뒤
+260	最初	さいしょ	최초. 처음
+261	サイン	サイン	사인
+262	坂	さか	비탈길. 고개
+263	盛んな	さかんな	성행한
+264	作品	さくひん	작품
+265	桜	さくら	벚나무. 벚꽃
+266	差す	さす	(우산을) 쓰다. (햇볕이) 비치다
+267	させる	させる	시키다. 하게 만들다
+268	さっき	さっき	아까. 조금 전에
+269	寂しい	さびしい	외롭다. 쓸쓸하다
+270	-様	さま	-님
+271	サラダ	サラダ	샐러드
+272	される	される	する의 수동형. 당하다. 받다. 되다
+273	騒ぐ	さわぐ	떠들다
+274	産業	さんぎょう	산업
+275	算数	さんすう	산수. 초등 수학
+276	賛成	さんせい	찬성
+277	サンダル	サンダル	샌들
+278	サンドイッチ	サンドイッチ	샌드위치
+279	残念な	ざんねんな	유감스러운. 아쉬운
+280	市	し	시. 도시
+281	字	じ	글자. 글씨
+282	しかし	しかし	그러나
+283	仕方	しかた	하는 방법. 수단
+284	仕方ない	しかたない	어쩔 수 없다. 할 수 없다
+285	試験	しけん	시험
+286	事故	じこ	사고
+287	地震	じしん	지진
+288	舌	した	혀
+289	時代	じだい	시대
+290	したがる	したがる	하고 싶어하다
+291	下着	したぎ	속옷. 내의
+292	支度	したく	채비. 준비
+293	親しい	したしい	친하다. 사이가 좋다
+294	しっかり	しっかり	단단히. 꼭. 똑똑히. 정신 차려서. 확
+295	失敗	しっぱい	실패
+296	質問	しつもん	질문
+297	自転車	じてんしゃ	자전거
+298	自動	じどう	자동
+299	自動車	じどうしゃ	자동차
+300	品物	しなもの	물품. 상품
+301	支払(い)	しはらい	지불. 지급
+302	自分	じぶん	자기. 자신
+303	島	しま	섬
+304	姉妹	しまい	자매
+305	しまう	しまう	끝마치다. 치우다. 안에 넣다. …해 버리다
+306	事務所	じむしょ	사무소
+307	じゃ(あ)	じゃ(あ)	그럼 ＝では
+308	社会	しゃかい	사회
+309	社長	しゃちょう	사장
+310	邪魔	じゃま	방해. 장애
+311	邪魔な	じゃまな	방해가 되는. 귀찮은
+312	ジャム	ジャム	잼
+313	-中	じゅう	온-. -내내 (장소 기간 전체에)
+314	習慣	しゅうかん	습관
+315	週間	しゅうかん	주간
+316	住所	じゅうしょ	주소
+317	ジュース	ジュース	주스
+318	柔道	じゅうどう	유도
+319	自由な	じゆうな	자유로운
+320	十分	じゅうぶん	충분히
+321	十分な	じゅうぶんな	충분한
+322	出席	しゅっせき	출석
+323	準備	じゅんび	준비
+324	-場	じょう/-ば	-장 (장소)
+325	紹介	しょうかい	소개
+326	正月	しょうがつ	정월. 설날
+327	小学校	しょうがっこう	소학교. 초등학교
+328	小説	しょうせつ	소설
+329	醬油	しょうゆ	간장
+330	将来	しょうらい	장래. 미래
+331	食事	しょくじ	식사
+332	食料品	しょくりょうひん	식료품
+333	女性	じょせい	여성
+334	知らせる	しらせる	알리다
+335	調べる	しらべる	알아보다. 조사하다
+336	人口	じんこう	인구
+337	神社	じんじゃ	신사
+338	心配	しんぱい	걱정. 근심
+339	心配な	しんぱいな	걱정스러운
+340	水泳	すいえい	수영
+341	ずいぶん	ずいぶん	몹시. 상당히. 충분히. 너무
+342	スーツ	スーツ	슈트. 정장
+343	スーツケース	スーツケース	여행용 가방
+344	スーパー	スーパー	슈퍼
+345	すぎる	すぎる	(ます형+) 너무 …하다. 지나치게 …하다
+346	過ぎる	すぎる	지나다. 통과하다
+347	空く	すく	틈이 나다. 짬이 나다. 속이 비다
+348	すぐに	すぐに	곧. 즉시. 곧바로
+349	すごい	すごい	굉장하다. 대단하다
+350	進む	すすむ	앞으로 가다. 나아가다
+351	すっかり	すっかり	죄다. 모두. 완전히
+352	ステレオ	ステレオ	스테레오
+353	砂	すな	모래
+354	素晴らしい	すばらしい	훌륭하다. 근사하다. 굉장하다
+355	スピーカー	スピーカー	스피커
+356	スピーチ	スピーチ	스피치
+357	滑る	すべる	미끄러지다
+358	すり	すり	소매치기
+359	スリッパ	スリッパ	슬리퍼
+360	すると	すると	그러자. 그렇다면
+361	-製	せい	-제 (만든 재료 회사명 국명을 나타내는 말)
+362	生産	せいさん	생산
+363	政治	せいじ	정치
+364	世界	せかい	세계
+365	席	せき	자리. 좌석
+366	セット	セット	세트
+367	説明	せつめい	설명
+368	是非	ぜひ	꼭 (+…하고 싶다 +…해주세요)
+369	背広	せびろ	신사복
+370	世話	せわ	도와줌. 보살핌. 소개함. 폐. 신세
+371	線	せん	선
+372	全国	ぜんこく	전국
+373	選手	せんしゅ	선수
+374	全然	ぜんぜん	전혀
+375	戦争	せんそう	전쟁
+376	全体	ぜんたい	전체
+377	そう	そう	그렇게
+378	掃除	そうじ	청소
+379	そうして	そうして	그리하여. 그리고나서
+380	相談	そうだん	상담. 상의. 의논
+381	そして	そして	그리고
+382	育てる	そだてる	키우다. 기르다. 양육하다
+383	卒業	そつぎょう	졸업
+384	そっち	そっち	그쪽
+385	ソフト	ソフト	소프트
+386	祖母	そぼ	(나의)할머니
+387	それで	それで	그래서
+388	それでは	それでは	그러면. 그렇다면
+389	それに	それに	게다가
+390	それ程	それほど	그다지. 그만큼
+391	そろそろ	そろそろ	시간이 다 되어가는 모양. 슬슬. 이제
+392	存じる	ぞんじる	知っている의 낮춤말. 알다. 알고 있다
+393	そんなに	そんなに	그렇게(도). 그렇게(까지)
+394	-台	だい	-대
+395	退院	たいいん	퇴원
+396	大使館	たいしかん	대사관
+397	大事な	だいじな	중요한
+398	大体	だいたい	대체적으로. 대개. 대충
+399	大抵	たいてい	대개. 대부분
+400	タイプ	タイプ	타입. 타이프
+401	大分	だいぶ	어지간히. 상당히. 꽤
+402	倒す	たおす	쓰러뜨리다
+403	倒れる	たおれる	쓰러지다. 자빠지다
+404	竹	たけ	대나무
+405	確かな	たしかな	확실한. 틀림없는
+406	訪ねる	たずねる	찾아가다. 방문하다
+407	ただいま	ただいま	다녀왔습니다
+408	只今	ただいま	지금. 현재 (격식을 차린 말)
+409	正しい	ただしい	옳다. 바르다. 맞다
+410	畳	たたみ	다다미
+411	-達	たち	-들
+412	建つ	たつ	(건물이) 세워지다
+413	縦	たて	세로
+414	建てる	たてる	(건물을) 세우다. 짓다. 건축하다
+415	楽しみ	たのしみ	즐거움. 낙. 기대
+416	頼む	たのむ	부탁하다
+417	多分	たぶん	아마
+418	たまに	たまに	드물게. 어쩌다가. 때로는
+419	ため(に)	ため(に)	(목적)-를 위하여. (이유)-때문에
+420	だめな	だめな	안되는
+421	足りない	たりない	모자라다. 부족하다
+422	足りる	たりる	족하다. 충분하다
+423	誰か	だれか	누군가
+424	誰も	だれも	아무도 (+부정문)
+425	ダンス	ダンス	댄스
+426	男性	だんせい	남성
+427	血	ち	피
+428	違う	ちがう	다르다. 틀리다. 잘못되다
+429	力	ちから	힘
+430	地図	ちず	지도
+431	父親	ちちおや	부친
+432	ちっとも	ちっとも	조금도. 전혀
+433	茶色	ちゃいろ	갈색
+434	茶わん	ちゃわん	찻종. 밥공기
+435	ちゃん	ちゃん	친근감을 주는 호칭
+436	-中	ちゅう	-중 (장소 내에. 기간 중에. 진행중)
+437	中学校	ちゅうがっこう	중학교
+438	中止	ちゅうし	중지. 취소
+439	駐車	ちゅうしゃ	주차
+440	ちょうど	ちょうど	꼭. 정확히. 딱. 마치. 마침. 알맞게
+441	地理	ちり	지리
+442	捕まえる	つかまえる	붙잡다. 붙들다
+443	疲れる	つかれる	지치다. 피로해지다
+444	着く	つく	닿다. 도착하다
+445	付く	つく	붙다. 묻다. (전깃불이) 켜지다
+446	付ける	つける	붙이다. (전깃불을) 켜다
+447	都合	つごう	형편
+448	伝える	つたえる	전하다
+449	続く	つづく	계속되다
+450	勤める	つとめる	근무하다. 종사하다
+451	妻	つま	아내
+452	つまらない	つまらない	재미없다. 하찮다. 시시하다
+453	爪	つめ	손톱. 발톱
+454	冷たい	つめたい	차갑다. 차다. 냉정하다
+455	積もる	つもる	쌓이다
+456	釣る	つる	낚다
+457	連れて来る	つれてくる	데리고 오다
+458	丁寧な	ていねいな	정중한
+459	テープレコーダー	テープレコーダー	테이프 레코더. 녹음기
+460	出掛ける	でかける	외출하다. 집밖으로 나가다
+461	テキスト	テキスト	텍스트
+462	できる	できる	생기다
+463	テニス	テニス	테니스
+464	では	では	그러면. 그럼
+465	手袋	てぶくろ	장갑
+466	でも	でも	하지만. 그래도
+467	手元	てもと	손이 미치는 범위. 자기 주위
+468	寺	てら	절
+469	点	てん	점 (point)
+470	店員	てんいん	점원
+471	天気予報	てんきよほう	일기 예보
+472	展覧会	てんらんかい	전람회
+473	戸	と	문짝. 문. 도어
+474	-度	ど	-도. -번 (온도 각도 횟수 등)
+475	道具	どうぐ	도구
+476	とうとう	とうとう	드디어. 결국. 마침내
+477	動物園	どうぶつえん	동물원
+478	遠く	とおく	먼 곳. 멀리
+479	通り	とおり	큰길. 도로
+480	通る	とおる	통과하다. 지나가다
+481	時	とき	때
+482	特別な	とくべつな	특별한
+483	どこか	どこか	어딘가
+484	どこにも	どこにも	아무데도 (+부정문)
+485	床屋	とこや	이발소 또는 이발사
+486	都市	とし	도시
+487	途中	とちゅう	도중
+488	特急	とっきゅう	특급
+489	どっち	どっち	어느쪽
+490	届く	とどく	닿다. 달하다. 배달되다
+491	届ける	とどける	닿게 하다. 보내주다. 배달하다. 신고하다
+492	止まる	とまる	멈추다. 정지하다. 서다
+493	泊まる	とまる	묵다. 숙박하다
+494	止める	とめる	멈추게 하다. 정지시키다. 세우다
+495	泊める	とめる	숙박시키다. 재우다
+496	トラック	トラック	트럭
+497	ドラマ	ドラマ	드라마
+498	取り替える	とりかえる	바꾸다. 교환하다. 갈다
+499	取る	とる	(손에) 잡다. 들다. 쥐다
+500	ドレス	ドレス	드레스
+501	どんどん	どんどん	일이 순조롭게 진척되는 모양. 자꾸. 계속
+502	内部	ないぶ	내부
+503	直る	なおる	고쳐지다. 치료되다. 낫다
+504	流す	ながす	흘리다
+505	なかなか	なかなか	제법. 꽤. 좀처럼
+506	流れる	ながれる	흐르다
+507	泣く	なく	울다
+508	鳴く	なく	(동물 등이) 소리를 내어 울다
+509	亡くなる	なくなる	죽다. 돌아가시다
+510	無くなる	なくなる	없어지다. 다 떨어지다
+511	投げる	なげる	던지다
+512	なさる	なさる	する의 높임말. 하시다
+513	等	など	등. 따위
+514	何か	なにか	무엇인가
+515	何も	なにも	아무것도 (+부정문)
+516	並ぶ	ならぶ	한 줄로 서다. 배열되다
+517	並べる	ならべる	늘어놓다. 나란히 세우다
+518	なる	なる	…이 되다
+519	鳴る	なる	소리가 나다. 울리다
+520	なるほど	なるほど	정말. 과연 (그렇군요)
+521	慣れる	なれる	익숙해지다
+522	似合う	にあう	잘 맞다. 어울리다
+523	匂い	におい	냄새
+524	にくい	にくい	(ます형+) -하기 어렵다. -하기 힘들다
+525	逃げる	にげる	도망치다. 달아나다
+526	日記	にっき	일기
+527	入院	にゅういん	입원
+528	入学	にゅうがく	입학
+529	入社	にゅうしゃ	입사
+530	ニュース	ニュース	뉴스
+531	似る	にる	닮다. 비슷하다
+532	人形	にんぎょう	인형
+533	脱ぐ	ぬぐ	벗다
+534	盗む	ぬすむ	훔치다
+535	塗る	ぬる	바르다. 칠하다
+536	ぬるい	ぬるい	미지근하다
+537	濡れる	ぬれる	젖다
+538	願う	ねがう	원하다. 바라다
+539	値段	ねだん	값. 가격
+540	熱	ねつ	열
+541	寝坊	ねぼう	늦잠을 잠
+542	眠い	ねむい	졸리다
+543	眠たい	ねむたい	졸리다
+544	年代	ねんだい	연대
+545	残す	のこす	남기다
+546	残る	のこる	남다 (어떤 기준 이하로 남다)
+547	喉	のど	목구멍
+548	乗り換える	のりかえる	갈아타다. 환승하다
+549	乗り物	のりもの	탈것. 대중교통
+550	歯	は	이
+551	葉	は	잎
+552	パーティー	パーティー	파티
+553	-杯	はい	-잔
+554	-倍	ばい	-배. 갑절
+555	拝見する	はいけんする	見る의 낮춤말. 보다
+556	歯医者	はいしゃ	치과 의사
+557	ばかり	ばかり	(안좋은 것)만. -한 지 얼마 안됐음
+558	バケツ	バケツ	양동이
+559	箱	はこ	상자
+560	始まり	はじまり	시작. 시초
+561	初めて	はじめて	처음으로. 비로소
+562	始める	はじめる	시작하다
+563	場所	ばしょ	장소. 곳
+564	走る	はしる	(1G) 달리다
+565	はず	はず	(강한 추측) 꼭 -할 터이다. -할 리(+가 없다)
+566	恥ずかしい	はずかしい	부끄럽다. 창피하다
+567	バター	バター	버터
+568	働く	はたらく	일하다. 근무하다
+569	発音	はつおん	발음
+570	はっきり	はっきり	똑똑히. 명확히
+571	花見	はなみ	꽃구경. 꽃놀이
+572	母親	ははおや	모친
+573	林	はやし	수풀. 숲
+574	払う	はらう	(돈을) 지불하다
+575	晴れ	はれ	하늘이 갬. 날씨가 좋음
+576	晴れる	はれる	(날씨가) 개다
+577	晩	ばん	밤
+578	-番	ばん	-번 (번호)
+579	番	ばん	순서. 차례 (your turn)
+580	番組	ばんぐみ	방송 프로그램
+581	反対	はんたい	반대
+582	火	ひ	불
+583	日	ひ	해. 태양. 햇빛. 햇볕
+584	ピアノ	ピアノ	피아노
+585	ビール	ビール	맥주
+586	冷える	ひえる	차가워지다. 식다
+587	光	ひかり	빛
+588	光る	ひかる	빛나다. 번쩍이다
+589	-匹	ひき	-마리
+590	引き出し	ひきだし	서랍. 인출
+591	ピクニック	ピクニック	피크닉. 소풍
+592	美術館	びじゅつかん	미술관
+593	びっくり	びっくり	깜짝 놀람
+594	引っ越す	ひっこす	이사하다
+595	必要な	ひつような	필요한
+596	ひどい	ひどい	심하다. 가혹하다. 호되다. 지독하다
+597	一月	ひとつき	한 달. 1개월
+598	-秒	びょう	-초
+599	昼間	ひるま	낮동안
+600	昼休み	ひるやすみ	점심 시간. 점심 후의 휴식
+601	広さ	ひろさ	넓이
+602	ピンク	ピンク	핑크. 분홍색
+603	フィルム	フィルム	필름
+604	封筒	ふうとう	봉투
+605	プール	プール	풀장. 수영장
+606	フォーク	フォーク	포크
+607	吹く	ふく	불다
+608	復習	ふくしゅう	복습
+609	普通	ふつう	보통
+610	ぶつかる	ぶつかる	부딪히다. 충돌하다
+611	太い	ふとい	굵다
+612	葡萄	ぶどう	포도
+613	太る	ふとる	살찌다
+614	布団	ふとん	이부자리. 이불
+615	踏む	ふむ	밟다
+616	プリント	プリント	프린트
+617	プレゼント	プレゼント	선물
+618	文化	ぶんか	문화
+619	文学	ぶんがく	문학
+620	文書	ぶんしょ	문서
+621	文法	ぶんぽう	문법
+622	ページ	ページ	페이지
+623	ベッド	ベッド	침대
+624	別に	べつに	따로. 별개로. 별로
+625	別の	べつの	또다른. 별개의
+626	ベル	ベル	벨. 종
+627	減る	へる	(1G) 줄어들다. 감소되다
+628	辺	へん	근처. 부근. 정도
+629	返事	へんじ	대답. 답장. 응답
+630	弁当	べんとう	도시락
+631	変な	へんな	이상한
+632	貿易	ぼうえき	무역
+633	放送	ほうそう	방송
+634	法律	ほうりつ	법률
+635	ボート	ボート	보트
+636	ボール	ボール	볼. 공
+637	僕	ぼく	남자의 자칭. 나
+638	ポスト	ポスト	포스트. 우체통. 우편함. 지위. 직위
+639	程	ほど	정도. 만큼
+640	ほとんど	ほとんど	거의. 대부분
+641	骨	ほね	뼈
+642	本気	ほんき	본마음. 진심. 본정신
+643	本棚	ほんだな	책장
+644	本当に	ほんとうに	정말로. 참으로
+645	参る	まいる	(1G) 行く・来る의 낮춤말. 가다. 오다
+646	負ける	まける	지다. 패하다
+647	孫	まご	손자
+648	真面目な	まじめな	성실한. 진지한
+649	まず	まず	우선. 먼저. 첫째로
+650	マスク	マスク	마스크
+651	または	または	또는. 혹은
+652	松	まつ	소나무
+653	マッチ	マッチ	성냥
+654	窓口	まどぐち	창구
+655	間に合う	まにあう	제시간에 도착하다. 지각하지 않다
+656	回る	まわる	돌다. 회전하다
+657	漫画	まんが	만화
+658	真ん中	まんなか	한가운데
+659	万年筆	まんねんひつ	만년필
+660	見付かる	みつかる	발견되다. 들키다
+661	見付ける	みつける	발견하다. 찾아내다
+662	港	みなと	항구
+663	向かい	むかい	맞은편
+664	迎える	むかえる	맞이하다. 마중하다
+665	昔	むかし	옛날. 예전
+666	向こう	むこう	건너편. 저편
+667	虫	むし	벌레. 곤충
+668	村	むら	마을. 촌
+669	無理な	むりな	무리한
+670	メートル	メートル	미터
+671	召し上がる	めしあがる	食べる・飲む의 높임말. 잡수시다. 드시다
+672	珍しい	めずらしい	드물다. 희귀하다
+673	申し上げる	もうしあげる	言う의 낮춤말. 말씀드리다. 보고를 올리다
+674	申す	もうす	言う의 낮춤말. 말씀드리다
+675	もし	もし	만약. 만일. 혹시
+676	勿論	もちろん	물론
+677	戻す	もどす	되돌리다
+678	戻る	もどる	되돌아가다
+679	森	もり	수풀. 숲. 삼림
+680	-屋	や	그 직업을 가진 집 또는 사람. -가게. -쟁이. -꾼
+681	夜間	やかん	야간
+682	約束	やくそく	약속
+683	役に立つ	やくにたつ	도움이 되다
+684	焼ける	やける	타다. 구워지다
+685	やすい	やすい	(ます형+) -하기 쉽다. -하기 편하다
+686	やっぱり	やっぱり	역시
+687	やむ	やむ	(비가) 멈추다. 그치다
+688	やる	やる	(아랫사람이나 동물 식물에게) 주다
+689	やる	やる	하다 ＝する
+690	柔らかい	やわらかい	부드럽다
+691	ゆうべ	ゆうべ	어제 저녁. 어젯밤
+692	有名な	ゆうめいな	유명한
+693	-行き	ゆき	-행
+694	輸出	ゆしゅつ	수출
+695	輸入	ゆにゅう	수입
+696	指輪	ゆびわ	반지
+697	夢	ゆめ	꿈
+698	揺れる	ゆれる	흔들리다
+699	酔い	よい	취함. 취기. 멀미
+700	用意	ようい	준비. 대비
+701	用事	ようじ	볼일. 용건
+702	汚れる	よごれる	더러워지다
+703	予約	よやく	예약
+704	寄る	よる	들르다. 접근하다. 다가가다
+705	喜ぶ	よろこぶ	기뻐하다
+706	よろしい	よろしい	いい보다 더 공손한 말. 좋다
+707	立派な	りっぱな	훌륭한
+708	理由	りゆう	이유
+709	利用	りよう	이용
+710	旅館	りょかん	여관
+711	旅行	りょこう	여행
+712	留守	るす	외출하고 집에 없음. 부재중
+713	零	れい	영. 제로
+714	冷蔵庫	れいぞうこ	냉장고
+715	冷房	れいぼう	냉방
+716	歴史	れきし	역사
+717	レコード	レコード	레코드. 기록
+718	列車	れっしゃ	열차
+719	レベル	レベル	레벨. 수준
+720	レポート	レポート	리포트. 보고서
+721	練習	れんしゅう	연습
+722	連絡	れんらく	연락
+723	廊下	ろうか	복도
+724	老人	ろうじん	노인
+725	ワイシャツ	ワイシャツ	와이셔츠
+726	沸かす	わかす	(물을) 끓이다
+727	沸く	わく	(물이) 끓다
+728	訳	わけ	뜻. 까닭. 사정
+729	わざわざ	わざわざ	일부러. 모처럼
+730	忘れ物	わすれもの	물건을 깜박 잊고 옴 또는 그 잊은 물건
+731	忘れる	わすれる	잊다. 잊어버리다
+732	私	わたくし	わたし보다 더 공손한 말. 저
+733	渡る	わたる	건너다. 건너가다
+734	笑う	わらう	웃다
+735	割る	わる	나누다. 깨뜨리다
+736	割れる	われる	갈라지다. 깨지다
+737	ワンピース	ワンピース	원피스`;
+
+    function parseN4Tsv(text) {
+      return parseVocab(text);
+    }
+
+    /** @type {Record<"n5"|"n4", {all: object[], legacy: object[], new: object[]}>} */
+    const vocabParsedCache = {};
+
+    function ensureVocabParsed(level) {
+      const key = level === "n4" ? "n4" : "n5";
+      if (vocabParsedCache[key]) return vocabParsedCache[key];
+      if (key === "n5") {
+        vocabParsedCache.n5 = {
+          all: parseVocab(VOCAB_RAW),
+          legacy: parseVocab(N5_VOCAB_LEGACY_RAW),
+          new: parseVocab(N5_VOCAB_NEW_RAW),
+        };
+      } else {
+        vocabParsedCache.n4 = {
+          all: parseN4Tsv(N4_VOCAB_RAW),
+          legacy: parseN4Tsv(N4_VOCAB_LEGACY_RAW),
+          new: parseN4Tsv(N4_VOCAB_NEW_RAW),
+        };
+      }
+      return vocabParsedCache[key];
+    }
+
+    function prefetchVocabIdle() {
+      const run = window.requestIdleCallback || ((cb) => setTimeout(cb, 1200));
+      run(() => {
+        if (topMode === "hira") return;
+        const other = vocabLevel === "n5" ? "n4" : "n5";
+        ensureVocabParsed(other);
+      }, { timeout: 5000 });
+    }
+
+
+
+
+
+
+
+
+
+
+    const HIRA_RAW = `1	あ	a	あ行
+2	い	i	あ行
+3	う	u	あ行
+4	え	e	あ行
+5	お	o	あ行
+6	か	ka	か行
+7	き	ki	か行
+8	く	ku	か行
+9	け	ke	か行
+10	こ	ko	か行
+11	さ	sa	さ行
+12	し	shi	さ行
+13	す	su	さ行
+14	せ	se	さ行
+15	そ	so	さ行
+16	た	ta	た行
+17	ち	chi	た行
+18	つ	tsu	た行
+19	て	te	た行
+20	と	to	た行
+21	な	na	な行
+22	に	ni	な行
+23	ぬ	nu	な行
+24	ね	ne	な行
+25	の	no	な行
+26	は	ha	は行
+27	ひ	hi	は行
+28	ふ	fu	は行
+29	へ	he	は行
+30	ほ	ho	は行
+31	ま	ma	ま行
+32	み	mi	ま行
+33	む	mu	ま行
+34	め	me	ま行
+35	も	mo	ま行
+36	や	ya	や行
+37	ゆ	yu	や行
+38	よ	yo	や行
+39	ら	ra	ら行
+40	り	ri	ら行
+41	る	ru	ら行
+42	れ	re	ら行
+43	ろ	ro	ら行
+44	わ	wa	わ行
+45	を	wo	わ行
+46	ん	n	ん`;
+
+    function parseHiraTsv(text) {
+      const rows = [];
+      for (const line of text.trim().split("\n")) {
+        const parts = line.split("\t");
+        if (parts.length < 4) continue;
+        rows.push({
+          no: parseInt(parts[0], 10),
+          kana: parts[1],
+          romaji: parts[2],
+          rowKo: parts[3],
+        });
+      }
+      return rows;
+    }
+
+    const HIRA_ALL = parseHiraTsv(HIRA_RAW);
+    const HIRA_MC_POOL = HIRA_ALL.map((h) => ({
+      no: h.no,
+      kana: h.kana,
+      romaji: h.romaji,
+      rowKo: h.rowKo,
+      meaning: h.romaji,
+    }));
+
+    const HIRA_CHART_ROWS = [
+      { label: "あ", cells: ["あ", "い", "う", "え", "お"] },
+      { label: "K", cells: ["か", "き", "く", "け", "こ"] },
+      { label: "S", cells: ["さ", "し", "す", "せ", "そ"] },
+      { label: "T", cells: ["た", "ち", "つ", "て", "と"] },
+      { label: "N", cells: ["な", "に", "ぬ", "ね", "の"] },
+      { label: "H", cells: ["は", "ひ", "ふ", "へ", "ほ"] },
+      { label: "M", cells: ["ま", "み", "む", "め", "も"] },
+      { label: "Y", cells: ["や", null, "ゆ", null, "よ"] },
+      { label: "R", cells: ["ら", "り", "る", "れ", "ろ"] },
+      { label: "W", cells: ["わ", "を", "ん", null, null] },
+    ];
+
+    let filter = "N5";
+    let deck = ALL.slice();
+    let index = 0;
+    let flipped = false;
+
+    let mainMode = "cards";
+    let quizFilter = "N5";
+    let quizSession = null;
+    let quizQIndex = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+    let quizAttemptLog = [];
+
+    let topMode = "n5";
+    let subjectMode = "kanji";
+    let vocabLevel = "n5";
+    /** @type {"all"|"legacy"|"new"} */
+    let vocabPool = "all";
+    let vocabStudyMode = "cards";
+    let vocabDeck = [];
+    let vocabIndex = 0;
+    let vocabFlipped = false;
+
+    let vocabQuizSession = null;
+    let vocabQuizQIndex = 0;
+    let vocabQuizScore = 0;
+    let vocabQuizAnswered = false;
+    let vocabQuizAttemptLog = [];
+    /** @type {"meaning"|"reading"} */
+    let vocabQuizKind = "meaning";
+
+    let hiraStudyMode = "cards";
+    let hiraDeck = HIRA_ALL.slice();
+    let hiraIndex = 0;
+    let hiraFlipped = false;
+    let hiraQuizSession = null;
+    let hiraQuizQIndex = 0;
+    let hiraQuizScore = 0;
+    let hiraQuizAnswered = false;
+    let hiraQuizAttemptLog = [];
+
+    const viewCards = document.getElementById("viewCards");
+    const viewQuiz = document.getElementById("viewQuiz");
+    const viewWritten = document.getElementById("viewWritten");
+    const tabCards = document.getElementById("tabCards");
+    const tabQuiz = document.getElementById("tabQuiz");
+    const tabWritten = document.getElementById("tabWritten");
+    const appSubtitle = document.getElementById("appSubtitle");
+
+    const quizSetup = document.getElementById("quizSetup");
+    const quizPlay = document.getElementById("quizPlay");
+    const quizResult = document.getElementById("quizResult");
+    const quizCountSel = document.getElementById("quizCount");
+    const quizStart = document.getElementById("quizStart");
+    const quizProgress = document.getElementById("quizProgress");
+    const quizLevelBadge = document.getElementById("quizLevelBadge");
+    const quizIdNum = document.getElementById("quizIdNum");
+    const quizKanji = document.getElementById("quizKanji");
+    const quizOptions = document.getElementById("quizOptions");
+    const quizQuit = document.getElementById("quizQuit");
+    const quizResultScore = document.getElementById("quizResultScore");
+    const quizResultPct = document.getElementById("quizResultPct");
+    const quizWrongWrap = document.getElementById("quizWrongWrap");
+    const quizWrongList = document.getElementById("quizWrongList");
+    const quizAgain = document.getElementById("quizAgain");
+    const quizToSetup = document.getElementById("quizToSetup");
+
+    let writtenFilter = "N5";
+    let writtenSession = null;
+    let writtenQIndex = 0;
+    let writtenScore = 0;
+    let writtenGraded = false;
+    let writtenAttemptLog = [];
+
+    const writtenSetup = document.getElementById("writtenSetup");
+    const writtenPlay = document.getElementById("writtenPlay");
+    const writtenResult = document.getElementById("writtenResult");
+    const writtenCountSel = document.getElementById("writtenCount");
+    const writtenStart = document.getElementById("writtenStart");
+    const writtenProgress = document.getElementById("writtenProgress");
+    const writtenLevelBadge = document.getElementById("writtenLevelBadge");
+    const writtenIdNum = document.getElementById("writtenIdNum");
+    const writtenKanji = document.getElementById("writtenKanji");
+    const writtenMean = document.getElementById("writtenMean");
+    const writtenRead = document.getElementById("writtenRead");
+    const writtenFeedback = document.getElementById("writtenFeedback");
+    const writtenSubmit = document.getElementById("writtenSubmit");
+    const writtenNext = document.getElementById("writtenNext");
+    const writtenQuit = document.getElementById("writtenQuit");
+    const writtenResultScore = document.getElementById("writtenResultScore");
+    const writtenResultPct = document.getElementById("writtenResultPct");
+    const writtenWrongWrap = document.getElementById("writtenWrongWrap");
+    const writtenWrongList = document.getElementById("writtenWrongList");
+    const writtenAgain = document.getElementById("writtenAgain");
+    const writtenToSetup = document.getElementById("writtenToSetup");
+
+    const shellLevel = document.getElementById("shellLevel");
+    const shellKanji = document.getElementById("shellKanji");
+    const shellVocab = document.getElementById("shellVocab");
+    const shellHira = document.getElementById("shellHira");
+    const tabCatHira = document.getElementById("tabCatHira");
+    const tabCatN5 = document.getElementById("tabCatN5");
+    const tabCatN4 = document.getElementById("tabCatN4");
+    const tabSubKanji = document.getElementById("tabSubKanji");
+    const tabSubVocab = document.getElementById("tabSubVocab");
+    const tabVocabCards = document.getElementById("tabVocabCards");
+    const tabVocabList = document.getElementById("tabVocabList");
+    const tabVocabQuiz = document.getElementById("tabVocabQuiz");
+    const modeBarKanji = document.getElementById("modeBarKanji");
+    const modeBarVocab = document.getElementById("modeBarVocab");
+    const vocabPoolSelect = document.getElementById("vocabPoolSelect");
+    const vocabPoolSelectQuiz = document.getElementById("vocabPoolSelectQuiz");
+    const viewVocabCards = document.getElementById("viewVocabCards");
+    const viewVocabList = document.getElementById("viewVocabList");
+    const viewVocabQuiz = document.getElementById("viewVocabQuiz");
+    const vocabListScroll = document.getElementById("vocabListScroll");
+    const vocabListBadge = document.getElementById("vocabListBadge");
+    const vocabListProgress = document.getElementById("vocabListProgress");
+    const vocabListReset = document.getElementById("vocabListReset");
+    const vocabQuizSetup = document.getElementById("vocabQuizSetup");
+    const vocabQuizPlay = document.getElementById("vocabQuizPlay");
+    const vocabQuizResult = document.getElementById("vocabQuizResult");
+    const vocabQuizCountSel = document.getElementById("vocabQuizCount");
+    const vocabQuizStart = document.getElementById("vocabQuizStart");
+    const vocabQuizProgress = document.getElementById("vocabQuizProgress");
+    const vocabQuizLevelBadge = document.getElementById("vocabQuizLevelBadge");
+    const vocabQuizIdNum = document.getElementById("vocabQuizIdNum");
+    const vocabQuizWord = document.getElementById("vocabQuizWord");
+    const vocabQuizOptions = document.getElementById("vocabQuizOptions");
+    const vocabQuizQuit = document.getElementById("vocabQuizQuit");
+    const vocabQuizResultScore = document.getElementById("vocabQuizResultScore");
+    const vocabQuizResultPct = document.getElementById("vocabQuizResultPct");
+    const vocabQuizWrongWrap = document.getElementById("vocabQuizWrongWrap");
+    const vocabQuizWrongList = document.getElementById("vocabQuizWrongList");
+    const vocabQuizAgain = document.getElementById("vocabQuizAgain");
+    const vocabQuizToSetup = document.getElementById("vocabQuizToSetup");
+    const vocabQuizKindMean = document.getElementById("vocabQuizKindMean");
+    const vocabQuizKindRead = document.getElementById("vocabQuizKindRead");
+    const vocabQuizSetupHelp = document.getElementById("vocabQuizSetupHelp");
+    const vocabQuizPlayHint = document.getElementById("vocabQuizPlayHint");
+    const vocabCard = document.getElementById("vocabCard");
+    const vocabWordFront = document.getElementById("vocabWordFront");
+    const vocabReadFront = document.getElementById("vocabReadFront");
+    const vocabReadBack = document.getElementById("vocabReadBack");
+    const vocabMeanBack = document.getElementById("vocabMeanBack");
+    const vocabIdxFront = document.getElementById("vocabIdxFront");
+    const vocabIdxBack = document.getElementById("vocabIdxBack");
+    const vocabProgress = document.getElementById("vocabProgress");
+    const vocabBadgeFront = document.getElementById("vocabBadgeFront");
+    const vocabBadgeBack = document.getElementById("vocabBadgeBack");
+
+    const tabHiraCards = document.getElementById("tabHiraCards");
+    const tabHiraChart = document.getElementById("tabHiraChart");
+    const tabHiraQuiz = document.getElementById("tabHiraQuiz");
+    const viewHiraCards = document.getElementById("viewHiraCards");
+    const viewHiraChart = document.getElementById("viewHiraChart");
+    const viewHiraQuiz = document.getElementById("viewHiraQuiz");
+    const hiraChartGrid = document.getElementById("hiraChartGrid");
+    const hiraChartResetFlip = document.getElementById("hiraChartResetFlip");
+    const hiraShuffle = document.getElementById("hiraShuffle");
+    const hiraProgress = document.getElementById("hiraProgress");
+    const hiraCard = document.getElementById("hiraCard");
+    const hiraBadgeFront = document.getElementById("hiraBadgeFront");
+    const hiraBadgeBack = document.getElementById("hiraBadgeBack");
+    const hiraIdxFront = document.getElementById("hiraIdxFront");
+    const hiraIdxBack = document.getElementById("hiraIdxBack");
+    const hiraKanaFront = document.getElementById("hiraKanaFront");
+    const hiraRomajiBack = document.getElementById("hiraRomajiBack");
+    const hiraRowBack = document.getElementById("hiraRowBack");
+    const hiraPrev = document.getElementById("hiraPrev");
+    const hiraNext = document.getElementById("hiraNext");
+    const hiraFlip = document.getElementById("hiraFlip");
+    const hiraQuizSetup = document.getElementById("hiraQuizSetup");
+    const hiraQuizPlay = document.getElementById("hiraQuizPlay");
+    const hiraQuizResult = document.getElementById("hiraQuizResult");
+    const hiraQuizCountSel = document.getElementById("hiraQuizCount");
+    const hiraQuizStart = document.getElementById("hiraQuizStart");
+    const hiraQuizProgress = document.getElementById("hiraQuizProgress");
+    const hiraQuizBadge = document.getElementById("hiraQuizBadge");
+    const hiraQuizIdNum = document.getElementById("hiraQuizIdNum");
+    const hiraQuizKana = document.getElementById("hiraQuizKana");
+    const hiraQuizOptions = document.getElementById("hiraQuizOptions");
+    const hiraQuizQuit = document.getElementById("hiraQuizQuit");
+    const hiraQuizResultScore = document.getElementById("hiraQuizResultScore");
+    const hiraQuizResultPct = document.getElementById("hiraQuizResultPct");
+    const hiraQuizWrongWrap = document.getElementById("hiraQuizWrongWrap");
+    const hiraQuizWrongList = document.getElementById("hiraQuizWrongList");
+    const hiraQuizAgain = document.getElementById("hiraQuizAgain");
+    const hiraQuizToSetup = document.getElementById("hiraQuizToSetup");
+
+    const card = document.getElementById("card");
+    const kanjiFront = document.getElementById("kanjiFront");
+    const meaningBack = document.getElementById("meaningBack");
+    const levelBadge = document.getElementById("levelBadge");
+    const levelBadgeBack = document.getElementById("levelBadgeBack");
+    const indexNum = document.getElementById("indexNum");
+    const indexNumBack = document.getElementById("indexNumBack");
+    const progress = document.getElementById("progress");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnFlip = document.getElementById("btnFlip");
+    const btnShuffle = document.getElementById("btnShuffle");
+
+    function kanjiLevelTag() {
+      return topMode === "n4" ? "N4" : "N5";
+    }
+
+    function syncLevelFilters() {
+      if (topMode === "hira") return;
+      const tag = kanjiLevelTag();
+      filter = tag;
+      quizFilter = tag;
+      writtenFilter = tag;
+      vocabLevel = topMode;
+    }
+
+    function getVocabPools() {
+      return ensureVocabParsed(vocabLevel === "n5" ? "n5" : "n4");
+    }
+
+    function getVocabBasePool() {
+      const pools = getVocabPools();
+      if (vocabPool === "legacy") return pools.legacy;
+      if (vocabPool === "new") return pools.new;
+      return pools.all;
+    }
+
+    function vocabStorageKey() {
+      const lv = vocabLevel === "n5" ? "n5" : "n4";
+      return `${lv}_vocab_idx_${vocabPool}`;
+    }
+
+    function updateVocabPoolSelect() {
+      const pools = getVocabPools();
+      const labels = {
+        all: `전체 (${pools.all.length})`,
+        legacy: `기존 (${pools.legacy.length})`,
+        new: `신규 (${pools.new.length})`,
+      };
+      for (const sel of [vocabPoolSelect, vocabPoolSelectQuiz]) {
+        if (!sel) continue;
+        for (const opt of sel.options) {
+          if (labels[opt.value]) opt.textContent = labels[opt.value];
+        }
+        sel.value = vocabPool;
+      }
+    }
+
+    function setVocabPool(pool) {
+      if (pool !== "all" && pool !== "legacy" && pool !== "new") return;
+      const changed = vocabPool !== pool;
+      vocabPool = pool;
+      updateVocabPoolSelect();
+      if (!changed) return;
+      loadVocabDeck();
+      fillVocabQuizCountOptions();
+      if (vocabStudyMode === "quiz") showVocabQuizSetup();
+      else renderVocab();
+    }
+
+    function loadVocabDeck() {
+      vocabDeck = getVocabBasePool().slice();
+      vocabIndex = 0;
+      vocabFlipped = false;
+      vocabCard.classList.remove("flipped");
+      try {
+        const vi = parseInt(localStorage.getItem(vocabStorageKey()), 10);
+        if (!Number.isNaN(vi) && vi >= 0 && vi < vocabDeck.length) vocabIndex = vi;
+      } catch (_) {}
+    }
+
+    function updateAppChrome() {
+      const appH = document.getElementById("appTitle");
+      if (topMode === "hira") appH.textContent = "JLPT · 히라가나";
+      else if (subjectMode === "vocab") {
+        appH.textContent = topMode === "n4" ? "JLPT N4 · 단어" : "JLPT N5 · 단어";
+      } else {
+        appH.textContent = topMode === "n4" ? "JLPT N4 · 한자" : "JLPT N5 · 한자";
+      }
+    }
+
+    function syncHash() {
+      try {
+        if (topMode === "hira") {
+          location.hash = "hira";
+          return;
+        }
+        const base = topMode === "n4" ? "n4" : "n5";
+        location.hash = subjectMode === "vocab" ? `${base}-vocab` : base;
+      } catch (_) {}
+    }
+
+    function vocabCurrent() {
+      return vocabDeck[vocabIndex] || null;
+    }
+
+    function vocabReadingJapanese(s) {
+      const t = String(s || "").trim();
+      const cut = t.indexOf(" (");
+      if (cut >= 0) return t.slice(0, cut).trim();
+      return t;
+    }
+
+    function vocabQuizAnswerKey(q) {
+      return q.kind === "reading" ? vocabReadingJapanese(q.correct.reading) : q.correct.meaning;
+    }
+
+    function renderVocab() {
+      const c = vocabCurrent();
+      if (!c) return;
+      const n5 = vocabLevel === "n5";
+      const poolTag =
+        vocabPool === "legacy" ? " · 기존" : vocabPool === "new" ? " · 신규" : "";
+      const label = (n5 ? "N5" : "N4") + " 단어" + poolTag;
+      vocabBadgeFront.textContent = label;
+      vocabBadgeBack.textContent = label;
+      vocabBadgeFront.className = "badge " + (n5 ? "n5" : "n4");
+      vocabBadgeBack.className = "badge " + (n5 ? "n5" : "n4");
+      vocabWordFront.textContent = c.word;
+      vocabReadFront.textContent = vocabReadingJapanese(c.reading);
+      vocabReadBack.textContent = c.reading;
+      vocabMeanBack.textContent = c.meaning;
+      const num = String(c.no);
+      vocabIdxFront.textContent = num;
+      vocabIdxBack.textContent = num;
+      vocabProgress.textContent = `${vocabIndex + 1} / ${vocabDeck.length}`;
+      vocabCard.classList.toggle("flipped", vocabFlipped);
+    }
+
+    function vocabGo(delta) {
+      const n = vocabDeck.length;
+      if (!n) return;
+      vocabIndex = (vocabIndex + delta + n) % n;
+      vocabFlipped = false;
+      vocabCard.classList.remove("flipped");
+      renderVocab();
+      try {
+        localStorage.setItem(vocabStorageKey(), String(vocabIndex));
+      } catch (_) {}
+    }
+
+    function vocabToggleFlip() {
+      if (!vocabCurrent()) return;
+      vocabFlipped = !vocabFlipped;
+      vocabCard.classList.toggle("flipped", vocabFlipped);
+    }
+
+    function refreshVocabSubtitle() {
+      if (topMode === "hira" || subjectMode !== "vocab") return;
+      if (vocabStudyMode === "list") {
+        appSubtitle.textContent =
+          "\uae30\ubcf8(\uae30\uc874) \ub2e8\uc5b4 \ubaa9\ub85d: \ud589\uc744 \ub204\ub974\uba74 \uc624\ub978\ucabd\uc5d0 \uc77d\uae30\u00b7\ub73b. \u00ab\ubaa8\ub450 \uc228\uae30\u00bb\ub85c \uc804\ubd80 \uc228\uae41\ub2c8\ub2e4.";
+        return;
+      }
+      if (vocabStudyMode === "cards") {
+        appSubtitle.innerHTML =
+          "\uc55e \uc77c\ubcf8\uc5b4 \uc77d\uae30 \u00b7 \ub4a4 \ud55c\uad6d\uc5b4 \ub73b(\uc77d\uae30 \uc804\uccb4) \u00b7 <kbd>Space</kbd> \ub4a4\uc9d1\uae30 \u00b7 <kbd>\u2190</kbd><kbd>\u2192</kbd>";
+      } else if (vocabQuizKind === "reading") {
+        appSubtitle.textContent =
+          "\ub2e8\uc5b4 \uac1d\uad00\uc2dd: \uc77d\uae30\uc5d0 \ub9de\ub294 \uc77c\ubcf8\uc5b4 \uc77d\uae30\ub97c \uace0\ub985\ub2c8\ub2e4. \ud0a4\ubcf4\ub4dc 1~4 \ub610\ub294 \uc22b\uc790 \ud0a4 1~4\ub85c \ubcf4\uae30 \uc120\ud0dd";
+      } else {
+        appSubtitle.textContent =
+          "\ub2e8\uc5b4 \uac1d\uad00\uc2dd: \uc77d\uae30\uc5d0 \ub9de\ub294 \ud55c\uad6d\uc5b4 \ub73b\uc744 \uace0\ub985\ub2c8\ub2e4. \ud0a4\ubcf4\ub4dc 1~4 \ub610\ub294 \uc22b\uc790 \ud0a4 1~4\ub85c \ubcf4\uae30 \uc120\ud0dd";
+      }
+    }
+
+    function getVocabQuizPool() {
+      return getVocabBasePool();
+    }
+
+    function syncVocabQuizKindTabs() {
+      if (!vocabQuizKindMean || !vocabQuizKindRead) return;
+      const mean = vocabQuizKind === "meaning";
+      vocabQuizKindMean.classList.toggle("active", mean);
+      vocabQuizKindMean.setAttribute("aria-selected", mean);
+      vocabQuizKindRead.classList.toggle("active", !mean);
+      vocabQuizKindRead.setAttribute("aria-selected", !mean);
+    }
+
+    function updateVocabQuizSetupHelp() {
+      if (!vocabQuizSetupHelp) return;
+      if (vocabQuizKind === "reading") {
+        vocabQuizSetupHelp.innerHTML =
+          "\uc704\uc5d0 \ubcf4\uc774\ub294 <strong>\uc77c\ubcf8\uc5b4 \uc77d\uae30</strong>\uc5d0 \ub9de\ub294 <strong>\uc77d\uae30</strong>(\ud788\ub77c\uac00\ub098\u00b7\uac00\ud0c0\uce74\ub098)\ub97c \uace0\ub974\uc138\uc694.<br />\ubb38\uc81c \uc21c\uc11c\uc640 \ubcf4\uae30 \uc21c\uc11c\ub294 \uc138\ud2b8\ub9c8\ub2e4 \ubb34\uc791\uc704\uc785\ub2c8\ub2e4. (\ubcf4\uae30 4\uac1c \u00b7 \ud604\uc7ac \uae09\uc218 \ud480 \uae30\uc900)";
+      } else {
+        vocabQuizSetupHelp.innerHTML =
+          "\uc704\uc5d0 \ubcf4\uc774\ub294 <strong>\uc77c\ubcf8\uc5b4 \uc77d\uae30</strong>\uc5d0 \ub9de\ub294 <strong>\ud55c\uad6d\uc5b4 \ub73b</strong>\uc744 \uace0\ub974\uc138\uc694.<br />\ubb38\uc81c \uc21c\uc11c\uc640 \ubcf4\uae30 \uc21c\uc11c\ub294 \uc138\ud2b8\ub9c8\ub2e4 \ubb34\uc791\uc704\uc785\ub2c8\ub2e4. (\ubcf4\uae30 4\uac1c \u00b7 \ud604\uc7ac \uae09\uc218 \ud480 \uae30\uc900)";
+      }
+    }
+
+    function setVocabQuizKind(kind) {
+      if (kind !== "meaning" && kind !== "reading") return;
+      vocabQuizKind = kind;
+      syncVocabQuizKindTabs();
+      updateVocabQuizSetupHelp();
+      refreshVocabSubtitle();
+    }
+
+    function fillVocabQuizCountOptions() {
+      const pool = getVocabQuizPool();
+      const maxN = pool.length;
+      const presets = [5, 10, 15, 20, 30, 50, 100];
+      vocabQuizCountSel.innerHTML = "";
+      for (const n of presets) {
+        if (n > maxN) continue;
+        const o = document.createElement("option");
+        o.value = String(n);
+        o.textContent = `${n}문제`;
+        vocabQuizCountSel.appendChild(o);
+      }
+      const oAll = document.createElement("option");
+      oAll.value = "all";
+      oAll.textContent = `전부 (${maxN}문제)`;
+      vocabQuizCountSel.appendChild(oAll);
+      if (vocabQuizCountSel.options.length === 0) {
+        const o = document.createElement("option");
+        o.value = String(maxN);
+        o.textContent = `${maxN}문제`;
+        vocabQuizCountSel.appendChild(o);
+      }
+    }
+
+    function showVocabQuizSetup() {
+      vocabQuizSetup.hidden = false;
+      vocabQuizPlay.hidden = true;
+      vocabQuizResult.hidden = true;
+      vocabQuizSession = null;
+      vocabQuizWrongList.replaceChildren();
+      vocabQuizWrongWrap.hidden = true;
+      syncVocabQuizKindTabs();
+      updateVocabQuizSetupHelp();
+    }
+
+    function showVocabQuizResult() {
+      vocabQuizSetup.hidden = true;
+      vocabQuizPlay.hidden = true;
+      vocabQuizResult.hidden = false;
+      const total = vocabQuizSession.questions.length;
+      vocabQuizResultScore.textContent = `${vocabQuizScore} / ${total}`;
+      const pct = total ? Math.round((vocabQuizScore / total) * 100) : 0;
+      vocabQuizResultPct.textContent = `정답률 ${pct}%`;
+      renderVocabQuizWrongReview();
+    }
+
+    function renderVocabQuizQuestion() {
+      const qs = vocabQuizSession.questions;
+      if (vocabQuizQIndex >= qs.length) {
+        showVocabQuizResult();
+        return;
+      }
+      const q = qs[vocabQuizQIndex];
+      const { correct, choices, kind } = q;
+      const answerKey = vocabQuizAnswerKey(q);
+      vocabQuizProgress.textContent = `${vocabQuizQIndex + 1} / ${qs.length}`;
+      const n5 = vocabLevel === "n5";
+      vocabQuizLevelBadge.textContent = n5 ? "N5 단어" : "N4 단어";
+      vocabQuizLevelBadge.className = "badge " + (n5 ? "n5" : "n4");
+      vocabQuizIdNum.textContent = String(correct.no).padStart(3, "0");
+      vocabQuizWord.textContent = correct.word;
+      if (vocabQuizPlayHint) {
+        if (kind === "reading") {
+          vocabQuizPlayHint.innerHTML =
+            "이 읽기에 맞는 <strong>섞기</strong>(?�라�?�·�??카나)�?고르세요.";
+        } else {
+          vocabQuizPlayHint.innerHTML = "이 읽기에 맞는 <strong>한국어 뜻</strong>과?고르세요.";
+        }
+      }
+      vocabQuizOptions.innerHTML = "";
+      vocabQuizAnswered = false;
+      const keys = ["1", "2", "3", "4"];
+      choices.forEach((text, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "quiz-opt";
+        b.dataset.meaning = text;
+        const span = document.createElement("span");
+        span.textContent = text;
+        if (kind === "reading") span.setAttribute("lang", "ja");
+        b.innerHTML = `<span class="opt-key">${keys[i]}</span>`;
+        b.appendChild(span);
+        b.addEventListener("click", () => onVocabQuizPick(b, text, answerKey, kind));
+        vocabQuizOptions.appendChild(b);
+      });
+      vocabQuizPlay.focus({ preventScroll: true });
+    }
+
+    function onVocabQuizPick(btn, picked, answer, kind) {
+      if (vocabQuizAnswered || topMode === "hira" || subjectMode !== "vocab" || vocabStudyMode !== "quiz" || !vocabQuizSession) return;
+      const q = vocabQuizSession.questions[vocabQuizQIndex];
+      if (!q) return;
+      vocabQuizAnswered = true;
+      const isOk = picked === answer;
+      if (isOk) vocabQuizScore += 1;
+      vocabQuizAttemptLog.push({
+        kind: kind || q.kind,
+        no: q.correct.no,
+        word: q.correct.word,
+        reading: q.correct.reading,
+        meaning: q.correct.meaning,
+        answer,
+        picked,
+        ok: isOk,
+      });
+      const buttons = vocabQuizOptions.querySelectorAll(".quiz-opt");
+      buttons.forEach((el) => {
+        el.disabled = true;
+        const t = el.dataset.meaning;
+        if (t === answer) el.classList.add("correct");
+        else if (t === picked && t !== answer) el.classList.add("wrong");
+      });
+      setTimeout(() => {
+        vocabQuizQIndex += 1;
+        renderVocabQuizQuestion();
+      }, 650);
+    }
+
+
+    function getVocabLegacyPool() {
+      return getVocabPools().legacy.slice();
+    }
+
+    function resetVocabListReveal() {
+      if (!vocabListScroll) return;
+      vocabListScroll.querySelectorAll(".vocab-list-row.revealed").forEach((el) => {
+        el.classList.remove("revealed");
+        el.setAttribute("aria-expanded", "false");
+        const mean = el.querySelector(".vocab-list-meaning");
+        if (mean) mean.textContent = "\u00b7\u00b7\u00b7";
+      });
+    }
+
+    function toggleVocabListRow(row) {
+      const on = row.classList.toggle("revealed");
+      row.setAttribute("aria-expanded", on ? "true" : "false");
+      const mean = row.querySelector(".vocab-list-meaning");
+      if (mean) mean.textContent = on ? row.dataset.meaning || "" : "\u00b7\u00b7\u00b7";
+    }
+
+    function buildVocabListRow(item, i) {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "vocab-list-row";
+      row.setAttribute("role", "listitem");
+      row.setAttribute("aria-expanded", "false");
+      row.setAttribute(
+        "aria-label",
+        item.word + ", \ub204\ub974\uba74 \uc77d\uae30\uc640 \ub73b \ubcf4\uae30"
+      );
+      const num = document.createElement("span");
+      num.className = "vocab-list-num";
+      num.textContent = String(item.no != null ? item.no : i + 1);
+      const word = document.createElement("span");
+      word.className = "vocab-list-word";
+      word.setAttribute("lang", "ja");
+      word.textContent = item.word;
+      const meta = document.createElement("span");
+      meta.className = "vocab-list-meta";
+      const readEl = document.createElement("span");
+      readEl.className = "vocab-list-reading";
+      readEl.setAttribute("lang", "ja");
+      readEl.textContent = item.reading;
+      const meanEl = document.createElement("span");
+      meanEl.className = "vocab-list-meaning";
+      meanEl.textContent = "\u00b7\u00b7\u00b7";
+      meta.append(readEl, meanEl);
+      row.append(num, word, meta);
+      row.dataset.meaning = item.meaning;
+      return row;
+    }
+
+    let vocabListRenderGen = 0;
+
+    function renderVocabList() {
+      if (!vocabListScroll) return;
+      const pool = getVocabLegacyPool();
+      const n5 = vocabLevel === "n5";
+      const gen = ++vocabListRenderGen;
+      if (vocabListBadge) {
+        vocabListBadge.textContent = (n5 ? "N5" : "N4") + " \u00b7 \uae30\uc874";
+        vocabListBadge.className = "badge " + (n5 ? "n5" : "n4");
+      }
+      if (vocabListProgress) {
+        vocabListProgress.textContent = pool.length + "\uac1c";
+      }
+      vocabListScroll.replaceChildren();
+      if (!pool.length) return;
+
+      const BATCH = 72;
+      let at = 0;
+      const frag = document.createDocumentFragment();
+
+      function flush() {
+        if (gen !== vocabListRenderGen) return;
+        vocabListScroll.appendChild(frag);
+      }
+
+      function step() {
+        if (gen !== vocabListRenderGen) return;
+        const end = Math.min(at + BATCH, pool.length);
+        for (; at < end; at++) {
+          frag.appendChild(buildVocabListRow(pool[at], at));
+        }
+        if (at < pool.length) {
+          requestAnimationFrame(step);
+        } else {
+          flush();
+        }
+      }
+
+      if (pool.length <= BATCH) {
+        for (let i = 0; i < pool.length; i++) {
+          frag.appendChild(buildVocabListRow(pool[i], i));
+        }
+        flush();
+      } else {
+        requestAnimationFrame(step);
+      }
+    }
+
+    function refreshVocabShell() {
+      if (topMode === "hira" || subjectMode !== "vocab") return;
+      updateVocabPoolSelect();
+      refreshVocabSubtitle();
+      if (vocabStudyMode === "list") {
+        renderVocabList();
+        return;
+      }
+      if (vocabStudyMode === "cards") {
+        renderVocab();
+        vocabCard.focus({ preventScroll: true });
+      } else {
+        fillVocabQuizCountOptions();
+        showVocabQuizSetup();
+      }
+    }
+
+    function setVocabStudyMode(mode) {
+      vocabStudyMode = mode;
+      const cards = mode === "cards";
+      const list = mode === "list";
+      const quiz = mode === "quiz";
+      tabVocabCards.classList.toggle("active", cards);
+      tabVocabCards.setAttribute("aria-selected", cards);
+      if (tabVocabList) {
+        tabVocabList.classList.toggle("active", list);
+        tabVocabList.setAttribute("aria-selected", list);
+      }
+      tabVocabQuiz.classList.toggle("active", quiz);
+      tabVocabQuiz.setAttribute("aria-selected", quiz);
+      viewVocabCards.hidden = !cards;
+      if (viewVocabList) viewVocabList.hidden = !list;
+      viewVocabQuiz.hidden = !quiz;
+      if (list && vocabPool !== "legacy") {
+        vocabPool = "legacy";
+        updateVocabPoolSelect();
+      }
+      refreshVocabShell();
+    }
+
+    function setSubject(sub, doHash) {
+      subjectMode = sub;
+      const kj = sub === "kanji";
+      tabSubKanji.classList.toggle("active", kj);
+      tabSubKanji.setAttribute("aria-selected", kj);
+      tabSubVocab.classList.toggle("active", !kj);
+      tabSubVocab.setAttribute("aria-selected", !kj);
+      shellKanji.hidden = !kj;
+      shellVocab.hidden = kj;
+      if (modeBarKanji) modeBarKanji.hidden = !kj;
+      if (modeBarVocab) modeBarVocab.hidden = kj;
+      updateAppChrome();
+      if (kj) {
+        applyFilter();
+        setMode(mainMode);
+      } else {
+        loadVocabDeck();
+        setVocabStudyMode(vocabStudyMode);
+      }
+      if (doHash !== false) syncHash();
+    }
+
+    function refreshHiraSubtitle() {
+      if (topMode !== "hira") return;
+      if (hiraStudyMode === "cards") {
+        appSubtitle.innerHTML =
+          "\uc55e \u304b\u306a \u00b7 \ub4a4 \ub85c\ub9c8\uc790\u00b7\ud589(\ub2e8) \u00b7 <kbd>Space</kbd> \ub4a4\uc9d1\uae30 \u00b7 <kbd>\u2190</kbd><kbd>\u2192</kbd>";
+      } else if (hiraStudyMode === "chart") {
+        appSubtitle.textContent =
+          "\u4e94\u5341\u97f3\u56f3: \uce78\uc744 \ub204\ub974\uba74 \ub4a4\uc9d1\uc5b4 \ub85c\ub9c8\uc790\u00b7\ud589 \uc774\ub984\uc744 \ubcf4\uc785\ub2c8\ub2e4. \u00ab\ubaa8\ub450 \uc55e\uba74\u00bb\uc73c\ub85c \ub2e4\uc2dc \uc55e\uba74\uc73c\ub85c \ub3cc\ub9bd\ub2c8\ub2e4.";
+      } else {
+        appSubtitle.textContent =
+          "\ud788\ub77c\uac00\ub098 \uac1d\uad00\uc2dd: \u304b\u306a\uc5d0 \ub9de\ub294 \ub85c\ub9c8\uc790\ub97c \uace0\ub985\ub2c8\ub2e4. \ud0a4\ubcf4\ub4dc 1~4 \ub610\ub294 \uc22b\uc790 \ud0a4 1~4\ub85c \ubcf4\uae30 \uc120\ud0dd";
+      }
+    }
+
+    function ensureHiraChartBuilt() {
+      if (!hiraChartGrid || hiraChartGrid.getAttribute("data-built") === "1") return;
+      buildHiraChartDOM();
+    }
+
+    function buildHiraChartDOM() {
+      const kanaMap = new Map(HIRA_ALL.map((h) => [h.kana, h]));
+      hiraChartGrid.replaceChildren();
+
+      const headRow = document.createElement("div");
+      headRow.className = "hira-chart-row hira-chart-row-head";
+      headRow.setAttribute("role", "row");
+      const headLabel = document.createElement("div");
+      headLabel.className = "hira-chart-label";
+      headLabel.textContent = "段";
+      headRow.appendChild(headLabel);
+      for (const col of ["あ", "い", "う", "え", "お"]) {
+        const d = document.createElement("div");
+        d.className = "hira-chart-colhead";
+        d.textContent = col;
+        d.setAttribute("role", "columnheader");
+        headRow.appendChild(d);
+      }
+      hiraChartGrid.appendChild(headRow);
+
+      for (const row of HIRA_CHART_ROWS) {
+        const rowEl = document.createElement("div");
+        rowEl.className = "hira-chart-row";
+        rowEl.setAttribute("role", "row");
+        const lab = document.createElement("div");
+        lab.className = "hira-chart-label";
+        lab.textContent = row.label;
+        rowEl.appendChild(lab);
+        for (const kana of row.cells) {
+          if (!kana) {
+            const empty = document.createElement("div");
+            empty.className = "hira-chart-empty";
+            empty.setAttribute("role", "gridcell");
+            rowEl.appendChild(empty);
+            continue;
+          }
+          const meta = kanaMap.get(kana);
+          if (!meta) continue;
+          const tile = document.createElement("button");
+          tile.type = "button";
+          tile.className = "hira-chart-tile";
+          tile.setAttribute("aria-label", `${kana}, 눌러 뒤집기 보기`);
+          const inner = document.createElement("div");
+          inner.className = "hira-chart-tile-inner";
+          const front = document.createElement("div");
+          front.className = "hira-chart-face front";
+          front.textContent = kana;
+          const back = document.createElement("div");
+          back.className = "hira-chart-face back";
+          const rSpan = document.createElement("span");
+          rSpan.className = "hira-chart-romaji";
+          rSpan.textContent = meta.romaji;
+          const koSpan = document.createElement("span");
+          koSpan.className = "hira-chart-rowko";
+          koSpan.textContent = meta.rowKo;
+          back.append(rSpan, koSpan);
+          inner.append(front, back);
+          tile.appendChild(inner);
+          tile.addEventListener("click", () => tile.classList.toggle("flipped"));
+          tile.addEventListener("keydown", (ev) => {
+            if (ev.key === " " || ev.key === "Enter") {
+              ev.preventDefault();
+              tile.classList.toggle("flipped");
+            }
+          });
+          rowEl.appendChild(tile);
+        }
+        hiraChartGrid.appendChild(rowEl);
+      }
+
+      hiraChartGrid.setAttribute("data-built", "1");
+    }
+
+    function hiraCurrent() {
+      return hiraDeck[hiraIndex] || null;
+    }
+
+    function renderHira() {
+      const c = hiraCurrent();
+      if (!c) return;
+      hiraKanaFront.textContent = c.kana;
+      hiraRomajiBack.textContent = c.romaji;
+      hiraRowBack.textContent = c.rowKo + " (清音)";
+      const num = String(c.no);
+      hiraIdxFront.textContent = num;
+      hiraIdxBack.textContent = num;
+      hiraProgress.textContent = `${hiraIndex + 1} / ${hiraDeck.length}`;
+      hiraCard.classList.toggle("flipped", hiraFlipped);
+    }
+
+    function hiraGo(delta) {
+      const n = hiraDeck.length;
+      if (!n) return;
+      hiraIndex = (hiraIndex + delta + n) % n;
+      hiraFlipped = false;
+      hiraCard.classList.remove("flipped");
+      renderHira();
+      try {
+        localStorage.setItem("hira_fc_idx", String(hiraIndex));
+      } catch (_) {}
+    }
+
+    function hiraToggleFlip() {
+      if (!hiraCurrent()) return;
+      hiraFlipped = !hiraFlipped;
+      hiraCard.classList.toggle("flipped", hiraFlipped);
+    }
+
+    function fillHiraQuizCountOptions() {
+      const maxN = HIRA_MC_POOL.length;
+      const presets = [5, 10, 15, 20, 30, 46];
+      hiraQuizCountSel.innerHTML = "";
+      for (const n of presets) {
+        if (n > maxN) continue;
+        const o = document.createElement("option");
+        o.value = String(n);
+        o.textContent = `${n}문제`;
+        hiraQuizCountSel.appendChild(o);
+      }
+      const oAll = document.createElement("option");
+      oAll.value = "all";
+      oAll.textContent = `전부 (${maxN}문제)`;
+      hiraQuizCountSel.appendChild(oAll);
+    }
+
+    function showHiraQuizSetup() {
+      hiraQuizSetup.hidden = false;
+      hiraQuizPlay.hidden = true;
+      hiraQuizResult.hidden = true;
+      hiraQuizSession = null;
+      hiraQuizWrongList.replaceChildren();
+      hiraQuizWrongWrap.hidden = true;
+    }
+
+    function showHiraQuizResult() {
+      hiraQuizSetup.hidden = true;
+      hiraQuizPlay.hidden = true;
+      hiraQuizResult.hidden = false;
+      const total = hiraQuizSession.questions.length;
+      hiraQuizResultScore.textContent = `${hiraQuizScore} / ${total}`;
+      const pct = total ? Math.round((hiraQuizScore / total) * 100) : 0;
+      hiraQuizResultPct.textContent = `정답률 ${pct}%`;
+      renderHiraQuizWrongReview();
+    }
+
+    function renderHiraQuizQuestion() {
+      const qs = hiraQuizSession.questions;
+      if (hiraQuizQIndex >= qs.length) {
+        showHiraQuizResult();
+        return;
+      }
+      const { correct, choices } = qs[hiraQuizQIndex];
+      hiraQuizProgress.textContent = `${hiraQuizQIndex + 1} / ${qs.length}`;
+      hiraQuizBadge.textContent = "히라가나";
+      hiraQuizBadge.className = "badge hira";
+      hiraQuizIdNum.textContent = String(correct.no).padStart(2, "0");
+      hiraQuizKana.textContent = correct.kana;
+      hiraQuizOptions.innerHTML = "";
+      hiraQuizAnswered = false;
+      const keys = ["1", "2", "3", "4"];
+      choices.forEach((text, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "quiz-opt";
+        b.dataset.meaning = text;
+        b.innerHTML = `<span class="opt-key">${keys[i]}</span><span>${escapeHtml(text)}</span>`;
+        b.addEventListener("click", () => onHiraQuizPick(b, text, correct.romaji));
+        hiraQuizOptions.appendChild(b);
+      });
+      hiraQuizPlay.focus({ preventScroll: true });
+    }
+
+    function onHiraQuizPick(btn, picked, answer) {
+      if (hiraQuizAnswered || topMode !== "hira" || hiraStudyMode !== "quiz" || !hiraQuizSession) return;
+      const q = hiraQuizSession.questions[hiraQuizQIndex];
+      if (!q) return;
+      hiraQuizAnswered = true;
+      const isOk = picked === answer;
+      if (isOk) hiraQuizScore += 1;
+      hiraQuizAttemptLog.push({
+        no: q.correct.no,
+        kana: q.correct.kana,
+        rowKo: q.correct.rowKo,
+        answer,
+        picked,
+        ok: isOk,
+      });
+      const buttons = hiraQuizOptions.querySelectorAll(".quiz-opt");
+      buttons.forEach((el) => {
+        el.disabled = true;
+        const t = el.dataset.meaning;
+        if (t === answer) el.classList.add("correct");
+        else if (t === picked && t !== answer) el.classList.add("wrong");
+      });
+      setTimeout(() => {
+        hiraQuizQIndex += 1;
+        renderHiraQuizQuestion();
+      }, 650);
+    }
+
+    function renderHiraQuizWrongReview() {
+      hiraQuizWrongList.replaceChildren();
+      const wrong = hiraQuizAttemptLog.filter((x) => !x.ok);
+      hiraQuizWrongWrap.hidden = false;
+      if (wrong.length === 0) {
+        fillWrongReviewEmpty(hiraQuizWrongList, "틀린 문항을 학습했습니다.");
+        return;
+      }
+      for (const w of wrong) {
+        const box = document.createElement("div");
+        box.className = "wrong-review-item";
+        const head = document.createElement("div");
+        head.className = "wrong-q word-q";
+        head.textContent = w.kana;
+        box.appendChild(head);
+        const meta = document.createElement("div");
+        meta.className = "wrong-review-line";
+        meta.textContent = `No.${w.no} · ${w.rowKo || ""}`;
+        box.appendChild(meta);
+        wrongReviewLine(box, "정답(로마자):", w.answer);
+        wrongReviewLine(box, "내가 고른 답:", w.picked);
+        hiraQuizWrongList.appendChild(box);
+      }
+    }
+
+    function refreshHiraShell() {
+      if (topMode !== "hira") return;
+      refreshHiraSubtitle();
+      if (hiraStudyMode === "cards") {
+        try {
+          const vi = parseInt(localStorage.getItem("hira_fc_idx"), 10);
+          if (!Number.isNaN(vi) && vi >= 0 && vi < hiraDeck.length) hiraIndex = vi;
+        } catch (_) {}
+        renderHira();
+        hiraCard.focus({ preventScroll: true });
+      } else if (hiraStudyMode === "chart") {
+        ensureHiraChartBuilt();
+      } else {
+        fillHiraQuizCountOptions();
+        showHiraQuizSetup();
+      }
+    }
+
+    function setHiraStudyMode(mode) {
+      hiraStudyMode = mode;
+      const cards = mode === "cards";
+      const chart = mode === "chart";
+      const quiz = mode === "quiz";
+      tabHiraCards.classList.toggle("active", cards);
+      tabHiraCards.setAttribute("aria-selected", cards);
+      tabHiraChart.classList.toggle("active", chart);
+      tabHiraChart.setAttribute("aria-selected", chart);
+      tabHiraQuiz.classList.toggle("active", quiz);
+      tabHiraQuiz.setAttribute("aria-selected", quiz);
+      viewHiraCards.hidden = !cards;
+      viewHiraChart.hidden = !chart;
+      viewHiraQuiz.hidden = !quiz;
+      refreshHiraShell();
+    }
+
+    function setJlptLevel(level, doHash, skipSubject) {
+      topMode = level;
+      const hir = level === "hira";
+      const n5 = level === "n5";
+      const n4 = level === "n4";
+      tabCatHira.classList.toggle("active", hir);
+      tabCatHira.setAttribute("aria-selected", hir);
+      tabCatN5.classList.toggle("active", n5);
+      tabCatN5.setAttribute("aria-selected", n5);
+      tabCatN4.classList.toggle("active", n4);
+      tabCatN4.setAttribute("aria-selected", n4);
+      shellHira.hidden = !hir;
+      shellLevel.hidden = hir;
+      if (hir) {
+        refreshHiraShell();
+      } else {
+        syncLevelFilters();
+        applyFilter();
+        fillQuizCountOptions();
+        fillWrittenCountOptions();
+        if (!skipSubject) setSubject(subjectMode, false);
+        else if (subjectMode === "vocab") {
+          loadVocabDeck();
+          updateVocabPoolSelect();
+          refreshVocabShell();
+        }
+      }
+      updateAppChrome();
+      if (doHash !== false) syncHash();
+    }
+
+    function applyHash() {
+      const h = (location.hash || "#n5").replace(/^#/, "");
+      if (h === "hira" || h === "hiragana") {
+        setJlptLevel("hira", false);
+        return;
+      }
+      const isN4 = h.startsWith("n4") || h === "vocab-n4";
+      const isVocab =
+        h.endsWith("-vocab") || h === "vocab" || h === "vocab-n5" || h === "vocab-n4";
+      const level = isN4 ? "n4" : "n5";
+      const sub = isVocab ? "vocab" : "kanji";
+      setJlptLevel(level, false, true);
+      setSubject(sub, false);
+    }
+
+    tabCatHira.addEventListener("click", () => setJlptLevel("hira"));
+    tabCatN5.addEventListener("click", () => setJlptLevel("n5"));
+    tabCatN4.addEventListener("click", () => setJlptLevel("n4"));
+    tabSubKanji.addEventListener("click", () => setSubject("kanji"));
+    tabSubVocab.addEventListener("click", () => setSubject("vocab"));
+    tabVocabCards.addEventListener("click", () => setVocabStudyMode("cards"));
+    if (tabVocabList) tabVocabList.addEventListener("click", () => setVocabStudyMode("list"));
+    tabVocabQuiz.addEventListener("click", () => setVocabStudyMode("quiz"));
+    if (vocabListReset) vocabListReset.addEventListener("click", resetVocabListReveal);
+    if (vocabListScroll) {
+      vocabListScroll.addEventListener("click", (ev) => {
+        const row = ev.target.closest(".vocab-list-row");
+        if (row && vocabListScroll.contains(row)) toggleVocabListRow(row);
+      });
+      vocabListScroll.addEventListener("keydown", (ev) => {
+        if (ev.key !== " " && ev.key !== "Enter") return;
+        const row = ev.target.closest(".vocab-list-row");
+        if (!row || !vocabListScroll.contains(row)) return;
+        ev.preventDefault();
+        toggleVocabListRow(row);
+      });
+    }
+    window.addEventListener("hashchange", () => applyHash());
+
+    if (vocabPoolSelect) {
+      vocabPoolSelect.addEventListener("change", () => setVocabPool(vocabPoolSelect.value));
+    }
+    if (vocabPoolSelectQuiz) {
+      vocabPoolSelectQuiz.addEventListener("change", () =>
+        setVocabPool(vocabPoolSelectQuiz.value)
+      );
+    }
+
+    document.getElementById("vocabShuffle").addEventListener("click", () => {
+      vocabDeck = shuffle(getVocabBasePool().slice());
+      vocabIndex = 0;
+      vocabFlipped = false;
+      vocabCard.classList.remove("flipped");
+      renderVocab();
+    });
+    document.getElementById("vocabPrev").addEventListener("click", () => vocabGo(-1));
+    document.getElementById("vocabNext").addEventListener("click", () => vocabGo(1));
+    document.getElementById("vocabFlip").addEventListener("click", (e) => {
+      e.stopPropagation();
+      vocabToggleFlip();
+    });
+    vocabCard.addEventListener("click", () => vocabToggleFlip());
+
+    vocabQuizStart.addEventListener("click", () => {
+      const pool = getVocabQuizPool();
+      if (pool.length < 4) {
+        alert("보기를 만들려면 단어가 최소 4개 이상 필요합니다");
+        return;
+      }
+      if (vocabQuizKind === "reading" && countUniqueVocabReadings(pool) < 4) {
+        alert("섞기 맞추기는 현재 급수 ? ?�에 로 서로 다른 읽기� 최소 4�� 단어??시작????학습?�다.");
+        return;
+      }
+      let n;
+      if (vocabQuizCountSel.value === "all") n = pool.length;
+      else n = Math.min(parseInt(vocabQuizCountSel.value, 10), pool.length);
+      if (!n || n < 1) return;
+      vocabQuizSession = buildVocabQuizSession(pool, n, vocabQuizKind);
+      vocabQuizQIndex = 0;
+      vocabQuizScore = 0;
+      vocabQuizAttemptLog = [];
+      vocabQuizSetup.hidden = true;
+      vocabQuizPlay.hidden = false;
+      vocabQuizResult.hidden = true;
+      renderVocabQuizQuestion();
+    });
+
+    vocabQuizQuit.addEventListener("click", () => {
+      if (confirm("단어 ?�즈�?중단?�까??")) showVocabQuizSetup();
+    });
+
+    vocabQuizAgain.addEventListener("click", () => {
+      const pool = getVocabQuizPool();
+      if (pool.length < 4) {
+        showVocabQuizSetup();
+        return;
+      }
+      if (vocabQuizKind === "reading" && countUniqueVocabReadings(pool) < 4) {
+        showVocabQuizSetup();
+        return;
+      }
+      let n;
+      if (vocabQuizCountSel.value === "all") n = pool.length;
+      else n = Math.min(parseInt(vocabQuizCountSel.value, 10), pool.length);
+      if (!n || n < 1) return;
+      vocabQuizSession = buildVocabQuizSession(pool, n, vocabQuizKind);
+      vocabQuizQIndex = 0;
+      vocabQuizScore = 0;
+      vocabQuizAttemptLog = [];
+      vocabQuizResult.hidden = true;
+      vocabQuizPlay.hidden = false;
+      renderVocabQuizQuestion();
+    });
+
+    vocabQuizToSetup.addEventListener("click", () => showVocabQuizSetup());
+
+    vocabQuizKindMean.addEventListener("click", () => setVocabQuizKind("meaning"));
+    vocabQuizKindRead.addEventListener("click", () => setVocabQuizKind("reading"));
+
+    tabHiraCards.addEventListener("click", () => setHiraStudyMode("cards"));
+    tabHiraChart.addEventListener("click", () => setHiraStudyMode("chart"));
+    tabHiraQuiz.addEventListener("click", () => setHiraStudyMode("quiz"));
+
+    hiraShuffle.addEventListener("click", () => {
+      hiraDeck = shuffle(HIRA_ALL.slice());
+      hiraIndex = 0;
+      hiraFlipped = false;
+      hiraCard.classList.remove("flipped");
+      renderHira();
+      try {
+        localStorage.setItem("hira_fc_idx", "0");
+      } catch (_) {}
+    });
+    hiraPrev.addEventListener("click", () => hiraGo(-1));
+    hiraNext.addEventListener("click", () => hiraGo(1));
+    hiraFlip.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hiraToggleFlip();
+    });
+    hiraCard.addEventListener("click", () => hiraToggleFlip());
+
+    hiraChartResetFlip.addEventListener("click", () => {
+      hiraChartGrid.querySelectorAll(".hira-chart-tile.flipped").forEach((el) => el.classList.remove("flipped"));
+    });
+
+    hiraQuizStart.addEventListener("click", () => {
+      const pool = HIRA_MC_POOL;
+      if (pool.length < 4) {
+        alert("보기를 만들려면 �?��? 최소 4개 이상 필요합니다");
+        return;
+      }
+      let n;
+      if (hiraQuizCountSel.value === "all") n = pool.length;
+      else n = Math.min(parseInt(hiraQuizCountSel.value, 10), pool.length);
+      if (!n || n < 1) return;
+      hiraQuizSession = buildQuizSession(pool, n);
+      hiraQuizQIndex = 0;
+      hiraQuizScore = 0;
+      hiraQuizAttemptLog = [];
+      hiraQuizSetup.hidden = true;
+      hiraQuizPlay.hidden = false;
+      hiraQuizResult.hidden = true;
+      renderHiraQuizQuestion();
+    });
+
+    hiraQuizQuit.addEventListener("click", () => {
+      if (confirm("히라가나?�즈�?중단?�까??")) showHiraQuizSetup();
+    });
+
+    hiraQuizAgain.addEventListener("click", () => {
+      const pool = HIRA_MC_POOL;
+      if (pool.length < 4) {
+        showHiraQuizSetup();
+        return;
+      }
+      let n;
+      if (hiraQuizCountSel.value === "all") n = pool.length;
+      else n = Math.min(parseInt(hiraQuizCountSel.value, 10), pool.length);
+      if (!n || n < 1) return;
+      hiraQuizSession = buildQuizSession(pool, n);
+      hiraQuizQIndex = 0;
+      hiraQuizScore = 0;
+      hiraQuizAttemptLog = [];
+      hiraQuizResult.hidden = true;
+      hiraQuizPlay.hidden = false;
+      renderHiraQuizQuestion();
+    });
+
+    hiraQuizToSetup.addEventListener("click", () => showHiraQuizSetup());
+
+    function applyFilter() {
+      if (filter === "N5") deck = ALL.filter((c) => c.level === "N5");
+      else if (filter === "N4") deck = ALL.filter((c) => c.level === "N4");
+      else deck = ALL.slice();
+      index = Math.min(index, Math.max(0, deck.length - 1));
+      flipped = false;
+      card.classList.remove("flipped");
+      render();
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function normalizeInput(s) {
+      if (s == null || s === "") return "";
+      return String(s)
+        .replace(/\u3000/g, " ")
+        .trim()
+        .replace(/\s+/g, " ");
+    }
+
+    function stripParenNotes(s) {
+      return String(s)
+        .replace(/\([^)]*\)/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function expandAcceptTargets(raw) {
+      const set = new Set();
+      const add = (s) => {
+        const n = normalizeInput(s);
+        if (n) set.add(n);
+        const stripped = normalizeInput(stripParenNotes(s));
+        if (stripped) set.add(stripped);
+      };
+      if (!raw) return set;
+      add(raw);
+      for (const seg of raw.split("|")) {
+        const t = seg.trim();
+        if (t) add(t);
+      }
+      add(raw.replace(/\|/g, " "));
+      return set;
+    }
+
+    function userWrittenCombined(mean, read) {
+      const m = normalizeInput(mean);
+      const r = normalizeInput(read);
+      if (m && r) return `${m} ${r}`;
+      return m || r || "";
+    }
+
+    function isWrittenAnswerCorrect(card, meanField, readField) {
+      const u = userWrittenCombined(meanField, readField);
+      if (!u) return false;
+      return expandAcceptTargets(card.meaning).has(u);
+    }
+
+    function current() {
+      return deck[index] || null;
+    }
+
+    function setFlipped(on) {
+      flipped = on;
+      card.classList.toggle("flipped", flipped);
+    }
+
+    function render() {
+      const c = current();
+      if (!c) {
+        kanjiFront.textContent = "—";
+        meaningBack.textContent = "카드 없음";
+        progress.textContent = "0 / 0";
+        return;
+      }
+      const num = String(c.id).padStart(3, "0");
+      kanjiFront.textContent = c.kanji;
+      meaningBack.textContent = c.meaning;
+      levelBadge.textContent = c.level;
+      levelBadgeBack.textContent = c.level;
+      levelBadge.classList.toggle("n5", c.level === "N5");
+      levelBadgeBack.classList.toggle("n5", c.level === "N5");
+      indexNum.textContent = num;
+      indexNumBack.textContent = num;
+      progress.textContent = `${index + 1} / ${deck.length}`;
+      setFlipped(flipped);
+    }
+
+    function go(delta) {
+      const n = deck.length;
+      if (n === 0) return;
+      index = (index + delta + n) % n;
+      flipped = false;
+      card.classList.remove("flipped");
+      render();
+      try {
+        const idxKey = topMode === "n4" ? "n4_kanji_fc_index" : "n5_kanji_fc_index";
+        localStorage.setItem(idxKey, String(index));
+        localStorage.setItem("jlpt_fc_index", String(index));
+      } catch (_) {}
+    }
+
+    function toggleFlip() {
+      if (!current()) return;
+      setFlipped(!flipped);
+    }
+
+    function getPoolByQuizFilter() {
+      if (quizFilter === "N5") return ALL.filter((c) => c.level === "N5");
+      if (quizFilter === "N4") return ALL.filter((c) => c.level === "N4");
+      return ALL.slice();
+    }
+
+    function fillQuizCountOptions() {
+      const pool = getPoolByQuizFilter();
+      const maxN = pool.length;
+      const presets = [5, 10, 15, 20, 30, 50, 100];
+      quizCountSel.innerHTML = "";
+      for (const n of presets) {
+        if (n > maxN) continue;
+        const o = document.createElement("option");
+        o.value = String(n);
+        o.textContent = `${n}문제`;
+        quizCountSel.appendChild(o);
+      }
+      const oAll = document.createElement("option");
+      oAll.value = "all";
+      oAll.textContent = `전부 (${maxN}문제)`;
+      quizCountSel.appendChild(oAll);
+      if (quizCountSel.options.length === 0) {
+        const o = document.createElement("option");
+        o.value = String(maxN);
+        o.textContent = `${maxN}문제`;
+        quizCountSel.appendChild(o);
+      }
+    }
+
+    function getPoolByWrittenFilter() {
+      if (writtenFilter === "N5") return ALL.filter((c) => c.level === "N5");
+      if (writtenFilter === "N4") return ALL.filter((c) => c.level === "N4");
+      return ALL.slice();
+    }
+
+    function fillWrittenCountOptions() {
+      const pool = getPoolByWrittenFilter();
+      const maxN = pool.length;
+      const presets = [5, 10, 15, 20, 30, 50, 100];
+      writtenCountSel.innerHTML = "";
+      for (const n of presets) {
+        if (n > maxN) continue;
+        const o = document.createElement("option");
+        o.value = String(n);
+        o.textContent = `${n}문제`;
+        writtenCountSel.appendChild(o);
+      }
+      const oAll = document.createElement("option");
+      oAll.value = "all";
+      oAll.textContent = `전부 (${maxN}문제)`;
+      writtenCountSel.appendChild(oAll);
+      if (writtenCountSel.options.length === 0) {
+        const o = document.createElement("option");
+        o.value = String(maxN);
+        o.textContent = `${maxN}문제`;
+        writtenCountSel.appendChild(o);
+      }
+    }
+
+    function buildWrittenSession(pool, totalQuestions) {
+      const n = Math.min(totalQuestions, pool.length);
+      const questions = shuffle(pool.slice()).slice(0, n);
+      return { questions };
+    }
+
+    function showWrittenSetup() {
+      writtenSetup.hidden = false;
+      writtenPlay.hidden = true;
+      writtenResult.hidden = true;
+      writtenSession = null;
+      writtenGraded = false;
+      writtenAttemptLog = [];
+      writtenWrongList.replaceChildren();
+      writtenWrongWrap.hidden = true;
+    }
+
+    function showWrittenResultPanel() {
+      writtenSetup.hidden = true;
+      writtenPlay.hidden = true;
+      writtenResult.hidden = false;
+      const total = writtenSession.questions.length;
+      writtenResultScore.textContent = `${writtenScore} / ${total}`;
+      const pct = total ? Math.round((writtenScore / total) * 100) : 0;
+      writtenResultPct.textContent = `정답률 ${pct}%`;
+      renderWrittenWrongReview();
+    }
+
+    function resetWrittenQuestionUI() {
+      writtenMean.value = "";
+      writtenRead.value = "";
+      writtenMean.disabled = false;
+      writtenRead.disabled = false;
+      writtenFeedback.hidden = true;
+      writtenFeedback.textContent = "";
+      writtenFeedback.className = "written-feedback";
+      writtenSubmit.hidden = false;
+      writtenSubmit.disabled = false;
+      writtenNext.hidden = true;
+      writtenGraded = false;
+    }
+
+    function renderWrittenQuestion() {
+      const qs = writtenSession.questions;
+      if (writtenQIndex >= qs.length) {
+        showWrittenResultPanel();
+        return;
+      }
+      const c = qs[writtenQIndex];
+      writtenProgress.textContent = `${writtenQIndex + 1} / ${qs.length}`;
+      writtenLevelBadge.textContent = c.level;
+      writtenLevelBadge.classList.toggle("n5", c.level === "N5");
+      writtenIdNum.textContent = String(c.id).padStart(3, "0");
+      writtenKanji.textContent = c.kanji;
+      resetWrittenQuestionUI();
+      writtenMean.focus({ preventScroll: true });
+    }
+
+    function doWrittenSubmit() {
+      if (writtenGraded || !writtenSession || writtenPlay.hidden) return;
+      const c = writtenSession.questions[writtenQIndex];
+      if (!c) return;
+      const ok = isWrittenAnswerCorrect(c, writtenMean.value, writtenRead.value);
+      if (ok) writtenScore += 1;
+      writtenAttemptLog.push({
+        level: c.level,
+        id: c.id,
+        kanji: c.kanji,
+        answerRef: c.meaning,
+        userMean: normalizeInput(writtenMean.value),
+        userRead: normalizeInput(writtenRead.value),
+        ok,
+      });
+      writtenGraded = true;
+      writtenMean.disabled = true;
+      writtenRead.disabled = true;
+      writtenSubmit.hidden = true;
+      writtenNext.hidden = false;
+      writtenFeedback.hidden = false;
+      writtenFeedback.className = "written-feedback " + (ok ? "ok" : "bad");
+      writtenFeedback.replaceChildren();
+      if (ok) {
+        writtenFeedback.appendChild(document.createTextNode("정답은니??"));
+      } else {
+        writtenFeedback.appendChild(document.createTextNode("정답은니??"));
+        const line = document.createElement("div");
+        line.className = "ans-line";
+        line.textContent = "정답(참고): " + c.meaning;
+        writtenFeedback.appendChild(line);
+      }
+      writtenNext.focus({ preventScroll: true });
+    }
+
+    function doWrittenNext() {
+      if (!writtenSession || !writtenGraded) return;
+      writtenQIndex += 1;
+      renderWrittenQuestion();
+    }
+
+    writtenStart.addEventListener("click", () => {
+      const pool = getPoolByWrittenFilter();
+      if (!pool.length) return;
+      let n;
+      if (writtenCountSel.value === "all") n = pool.length;
+      else n = Math.min(parseInt(writtenCountSel.value, 10), pool.length);
+      if (!n) return;
+      writtenSession = buildWrittenSession(pool, n);
+      writtenQIndex = 0;
+      writtenScore = 0;
+      writtenAttemptLog = [];
+      writtenSetup.hidden = true;
+      writtenPlay.hidden = false;
+      writtenResult.hidden = true;
+      renderWrittenQuestion();
+    });
+
+    writtenSubmit.addEventListener("click", () => doWrittenSubmit());
+    writtenNext.addEventListener("click", () => doWrittenNext());
+
+    writtenQuit.addEventListener("click", () => {
+      if (confirm("주관식을 중단할까요?")) showWrittenSetup();
+    });
+
+    writtenAgain.addEventListener("click", () => {
+      const pool = getPoolByWrittenFilter();
+      if (!pool.length) {
+        showWrittenSetup();
+        return;
+      }
+      let n;
+      if (writtenCountSel.value === "all") n = pool.length;
+      else n = Math.min(parseInt(writtenCountSel.value, 10), pool.length);
+      writtenSession = buildWrittenSession(pool, n);
+      writtenQIndex = 0;
+      writtenScore = 0;
+      writtenAttemptLog = [];
+      writtenResult.hidden = true;
+      writtenPlay.hidden = false;
+      renderWrittenQuestion();
+    });
+
+    writtenToSetup.addEventListener("click", () => showWrittenSetup());
+
+    writtenMean.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        writtenRead.focus();
+      }
+    });
+
+    writtenRead.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || writtenGraded) return;
+      e.preventDefault();
+      e.stopPropagation();
+      doWrittenSubmit();
+    });
+
+    function setMode(mode) {
+      mainMode = mode;
+      updateAppChrome();
+      const isCards = mode === "cards";
+      const isQuiz = mode === "quiz";
+      const isWritten = mode === "written";
+      tabCards.classList.toggle("active", isCards);
+      tabCards.setAttribute("aria-selected", isCards);
+      tabQuiz.classList.toggle("active", isQuiz);
+      tabQuiz.setAttribute("aria-selected", isQuiz);
+      tabWritten.classList.toggle("active", isWritten);
+      tabWritten.setAttribute("aria-selected", isWritten);
+      viewCards.hidden = !isCards;
+      viewQuiz.hidden = !isQuiz;
+      viewWritten.hidden = !isWritten;
+      if (isCards) {
+        appSubtitle.innerHTML =
+          '카드를 눌러 앞·뒤를 뒤집어요 · <kbd>Space</kbd> 뒤집기 ·  <kbd>←</kbd><kbd>→</kbd> 이동';
+        if (topMode !== "hira" && subjectMode === "kanji") card.focus({ preventScroll: true });
+      } else if (isQuiz) {
+        showQuizSetup();
+        appSubtitle.textContent =
+          "객관식 한자에 맞는 뜻·음??고릅니다. 키보드 1~4  또는 숫자 키 1~4로 보기 선택";
+        fillQuizCountOptions();
+      } else {
+        showWrittenSetup();
+        appSubtitle.textContent =
+          "주관식 뜻·음??입력한 뒤채점합니다 Enter: 채점 ??다음";
+        fillWrittenCountOptions();
+      }
+    }
+
+    tabCards.addEventListener("click", () => setMode("cards"));
+    tabQuiz.addEventListener("click", () => setMode("quiz"));
+    tabWritten.addEventListener("click", () => setMode("written"));
+
+    function buildDistractors(correct, pool, need) {
+      const used = new Set([correct.meaning]);
+      const out = [];
+      const others = shuffle(pool.filter((c) => c !== correct));
+      for (const c of others) {
+        if (out.length >= need) break;
+        if (used.has(c.meaning)) continue;
+        used.add(c.meaning);
+        out.push(c.meaning);
+      }
+      while (out.length < need) {
+        out.push("뜻 (보기 부족)");
+      }
+      return out;
+    }
+
+    function buildQuizSession(pool, totalQuestions) {
+      const n = Math.min(totalQuestions, pool.length);
+      const order = shuffle(pool.slice()).slice(0, n);
+      const questions = order.map((correct) => {
+        const wrong = buildDistractors(correct, pool, 3);
+        const choices = shuffle([correct.meaning, ...wrong]);
+        return { correct, choices };
+      });
+      return { questions, poolSize: pool.length };
+    }
+
+    function buildVocabReadingDistractors(correct, pool, need) {
+      const correctRead = vocabReadingJapanese(correct.reading);
+      const used = new Set([correctRead]);
+      const out = [];
+      const others = shuffle(pool.filter((c) => c !== correct));
+      for (const c of others) {
+        if (out.length >= need) break;
+        const r = vocabReadingJapanese(c.reading);
+        if (used.has(r)) continue;
+        used.add(r);
+        out.push(r);
+      }
+      while (out.length < need) {
+        out.push("뜻 (보기 부족)");
+      }
+      return out;
+    }
+
+    function countUniqueVocabReadings(pool) {
+      const s = new Set();
+      for (const c of pool) s.add(vocabReadingJapanese(c.reading));
+      return s.size;
+    }
+
+    function buildVocabQuizSession(pool, totalQuestions, kind) {
+      const n = Math.min(totalQuestions, pool.length);
+      const order = shuffle(pool.slice()).slice(0, n);
+      const questions = order.map((correct) => {
+        if (kind === "reading") {
+          const wrong = buildVocabReadingDistractors(correct, pool, 3);
+          const answerKey = vocabReadingJapanese(correct.reading);
+          const choices = shuffle([answerKey, ...wrong]);
+          return { correct, choices, kind: "reading" };
+        }
+        const wrong = buildDistractors(correct, pool, 3);
+        const choices = shuffle([correct.meaning, ...wrong]);
+        return { correct, choices, kind: "meaning" };
+      });
+      return { questions, poolSize: pool.length, kind };
+    }
+
+    function showQuizSetup() {
+      quizSetup.hidden = false;
+      quizPlay.hidden = true;
+      quizResult.hidden = true;
+      quizSession = null;
+      quizWrongList.replaceChildren();
+      quizWrongWrap.hidden = true;
+    }
+
+    function showQuizResult() {
+      quizSetup.hidden = true;
+      quizPlay.hidden = true;
+      quizResult.hidden = false;
+      const total = quizSession.questions.length;
+      quizResultScore.textContent = `${quizScore} / ${total}`;
+      const pct = total ? Math.round((quizScore / total) * 100) : 0;
+      quizResultPct.textContent = `정답률 ${pct}%`;
+      renderKanjiQuizWrongReview();
+    }
+
+    function renderQuizQuestion() {
+      const qs = quizSession.questions;
+      if (quizQIndex >= qs.length) {
+        showQuizResult();
+        return;
+      }
+      const { correct, choices } = qs[quizQIndex];
+      quizProgress.textContent = `${quizQIndex + 1} / ${qs.length}`;
+      quizLevelBadge.textContent = correct.level;
+      quizLevelBadge.classList.toggle("n5", correct.level === "N5");
+      quizIdNum.textContent = String(correct.id).padStart(3, "0");
+      quizKanji.textContent = correct.kanji;
+      quizOptions.innerHTML = "";
+      quizAnswered = false;
+      const keys = ["1", "2", "3", "4"];
+      choices.forEach((text, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "quiz-opt";
+        b.dataset.meaning = text;
+        b.innerHTML = `<span class="opt-key">${keys[i]}</span><span>${escapeHtml(text)}</span>`;
+        b.addEventListener("click", () => onPickOption(b, text, correct.meaning));
+        quizOptions.appendChild(b);
+      });
+      quizPlay.focus({ preventScroll: true });
+    }
+
+    function escapeHtml(s) {
+      return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function mcChoiceIndexFromEvent(e) {
+      if (e.isComposing || e.metaKey || e.ctrlKey || e.altKey) return -1;
+      const k = e.key;
+      if (k === "1" || k === "2" || k === "3" || k === "4") return parseInt(k, 10) - 1;
+      const byCode = {
+        Digit1: 0,
+        Digit2: 1,
+        Digit3: 2,
+        Digit4: 3,
+        Numpad1: 0,
+        Numpad2: 1,
+        Numpad3: 2,
+        Numpad4: 3,
+      };
+      if (e.code in byCode) return byCode[e.code];
+      return -1;
+    }
+
+    function wrongReviewLine(parent, label, value) {
+      const row = document.createElement("div");
+      row.className = "wrong-review-line";
+      const lab = document.createElement("span");
+      lab.className = "wrong-lab";
+      lab.textContent = label;
+      const val = document.createElement("span");
+      val.className = "wrong-val";
+      val.textContent = value == null || value === "" ? "—" : String(value);
+      row.append(lab, val);
+      parent.appendChild(row);
+    }
+
+    function fillWrongReviewEmpty(listEl, message) {
+      listEl.replaceChildren();
+      const p = document.createElement("p");
+      p.className = "wrong-review-line";
+      p.style.marginTop = "0";
+      p.textContent = message;
+      listEl.appendChild(p);
+    }
+
+    function renderKanjiQuizWrongReview() {
+      quizWrongList.replaceChildren();
+      const wrong = quizAttemptLog.filter((x) => !x.ok);
+      quizWrongWrap.hidden = false;
+      if (wrong.length === 0) {
+        fillWrongReviewEmpty(quizWrongList, "틀린 문항을 학습했습니다.");
+        return;
+      }
+      for (const w of wrong) {
+        const box = document.createElement("div");
+        box.className = "wrong-review-item";
+        const head = document.createElement("div");
+        head.className = "wrong-q";
+        head.textContent = w.kanji;
+        box.appendChild(head);
+        const meta = document.createElement("div");
+        meta.className = "wrong-review-line";
+        meta.textContent = `${w.level} · ID ${String(w.id).padStart(3, "0")}`;
+        box.appendChild(meta);
+        wrongReviewLine(box, "정답:", w.answer);
+        wrongReviewLine(box, "내가 고른 답:", w.picked);
+        quizWrongList.appendChild(box);
+      }
+    }
+
+    function renderVocabQuizWrongReview() {
+      vocabQuizWrongList.replaceChildren();
+      const wrong = vocabQuizAttemptLog.filter((x) => !x.ok);
+      vocabQuizWrongWrap.hidden = false;
+      if (wrong.length === 0) {
+        fillWrongReviewEmpty(vocabQuizWrongList, "틀린 문항을 학습했습니다.");
+        return;
+      }
+      for (const w of wrong) {
+        const box = document.createElement("div");
+        box.className = "wrong-review-item";
+        const head = document.createElement("div");
+        head.className = "wrong-q word-q";
+        head.textContent = w.word;
+        box.appendChild(head);
+        const meta = document.createElement("div");
+        meta.className = "wrong-review-line";
+        const rd = w.reading != null ? String(w.reading).trim() : "";
+        meta.textContent = rd ? `No.${w.no} · ${rd}` : `No.${w.no}`;
+        box.appendChild(meta);
+        wrongReviewLine(box, w.kind === "reading" ? "정답(읽기):" : "정답(뜻):", w.answer);
+        if (w.kind === "reading" && w.meaning) wrongReviewLine(box, "뜻(참고):", w.meaning);
+        wrongReviewLine(box, "내가 고른 답:", w.picked);
+        vocabQuizWrongList.appendChild(box);
+      }
+    }
+
+    function renderWrittenWrongReview() {
+      writtenWrongList.replaceChildren();
+      const wrong = writtenAttemptLog.filter((x) => !x.ok);
+      writtenWrongWrap.hidden = false;
+      if (wrong.length === 0) {
+        fillWrongReviewEmpty(writtenWrongList, "틀린 문항을 학습했습니다.");
+        return;
+      }
+      for (const w of wrong) {
+        const box = document.createElement("div");
+        box.className = "wrong-review-item";
+        const head = document.createElement("div");
+        head.className = "wrong-q";
+        head.textContent = w.kanji;
+        box.appendChild(head);
+        const meta = document.createElement("div");
+        meta.className = "wrong-review-line";
+        meta.textContent = `${w.level} · ID ${String(w.id).padStart(3, "0")}`;
+        box.appendChild(meta);
+        wrongReviewLine(box, "정답(뜻·음):", w.answerRef);
+        wrongReviewLine(box, "내가 입력한 뜻:", w.userMean);
+        wrongReviewLine(box, "내가 입력한 음:", w.userRead);
+        writtenWrongList.appendChild(box);
+      }
+    }
+
+    function onPickOption(btn, picked, answer) {
+      if (quizAnswered || mainMode !== "quiz" || !quizSession) return;
+      const q = quizSession.questions[quizQIndex];
+      if (!q) return;
+      quizAnswered = true;
+      const isOk = picked === answer;
+      if (isOk) quizScore += 1;
+      quizAttemptLog.push({
+        level: q.correct.level,
+        id: q.correct.id,
+        kanji: q.correct.kanji,
+        answer,
+        picked,
+        ok: isOk,
+      });
+      const buttons = quizOptions.querySelectorAll(".quiz-opt");
+      buttons.forEach((el) => {
+        el.disabled = true;
+        const t = el.dataset.meaning;
+        if (t === answer) el.classList.add("correct");
+        else if (t === picked && t !== answer) el.classList.add("wrong");
+      });
+      setTimeout(() => {
+        quizQIndex += 1;
+        renderQuizQuestion();
+      }, 650);
+    }
+
+    quizStart.addEventListener("click", () => {
+      const pool = getPoolByQuizFilter();
+      if (pool.length < 4) {
+        alert("보기를 만들려면 급수에 한자가 최소 4개 이상 필요합니다");
+        return;
+      }
+      let n;
+      if (quizCountSel.value === "all") n = pool.length;
+      else n = Math.min(parseInt(quizCountSel.value, 10), pool.length);
+      if (!n || n < 1) return;
+      quizSession = buildQuizSession(pool, n);
+      quizQIndex = 0;
+      quizScore = 0;
+      quizAttemptLog = [];
+      quizSetup.hidden = true;
+      quizPlay.hidden = false;
+      quizResult.hidden = true;
+      renderQuizQuestion();
+    });
+
+    quizQuit.addEventListener("click", () => {
+      if (confirm("?�즈�?중단?�까??")) showQuizSetup();
+    });
+
+    quizAgain.addEventListener("click", () => {
+      const pool = getPoolByQuizFilter();
+      if (pool.length < 4) {
+        showQuizSetup();
+        return;
+      }
+      let n;
+      if (quizCountSel.value === "all") n = pool.length;
+      else n = Math.min(parseInt(quizCountSel.value, 10), pool.length);
+      quizSession = buildQuizSession(pool, n);
+      quizQIndex = 0;
+      quizScore = 0;
+      quizAttemptLog = [];
+      quizResult.hidden = true;
+      quizPlay.hidden = false;
+      renderQuizQuestion();
+    });
+
+    quizToSetup.addEventListener("click", () => showQuizSetup());
+
+    btnPrev.addEventListener("click", () => go(-1));
+    btnNext.addEventListener("click", () => go(1));
+    btnFlip.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFlip();
+    });
+    card.addEventListener("click", () => toggleFlip());
+
+    btnShuffle.addEventListener("click", () => {
+      deck = shuffle(deck);
+      index = 0;
+      flipped = false;
+      card.classList.remove("flipped");
+      render();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (topMode !== "hira" && subjectMode === "vocab") {
+        if (vocabStudyMode === "quiz") {
+          if (
+            !vocabQuizPlay.hidden &&
+            vocabQuizResult.hidden &&
+            vocabQuizSession &&
+            !vocabQuizAnswered
+          ) {
+            if (e.repeat) return;
+            const idx = mcChoiceIndexFromEvent(e);
+            if (idx >= 0 && idx < 4) {
+              const btns = vocabQuizOptions.querySelectorAll(".quiz-opt");
+              const b = btns[idx];
+              if (b && !b.disabled) {
+                e.preventDefault();
+                const qs = vocabQuizSession.questions[vocabQuizQIndex];
+                if (qs) onVocabQuizPick(b, qs.choices[idx], vocabQuizAnswerKey(qs), qs.kind);
+              }
+            }
+          }
+          return;
+        }
+        if (e.target !== vocabCard && e.target.tagName === "INPUT") return;
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          vocabToggleFlip();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          vocabGo(-1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          vocabGo(1);
+        }
+        return;
+      }
+      if (topMode === "hira") {
+        if (hiraStudyMode === "quiz") {
+          if (
+            !hiraQuizPlay.hidden &&
+            hiraQuizResult.hidden &&
+            hiraQuizSession &&
+            !hiraQuizAnswered
+          ) {
+            if (e.repeat) return;
+            const idx = mcChoiceIndexFromEvent(e);
+            if (idx >= 0 && idx < 4) {
+              const btns = hiraQuizOptions.querySelectorAll(".quiz-opt");
+              const b = btns[idx];
+              if (b && !b.disabled) {
+                e.preventDefault();
+                const qs = hiraQuizSession.questions[hiraQuizQIndex];
+                if (qs) onHiraQuizPick(b, qs.choices[idx], qs.correct.romaji);
+              }
+            }
+          }
+          return;
+        }
+        if (hiraStudyMode === "chart") {
+          return;
+        }
+        if (e.target !== hiraCard && e.target.tagName === "INPUT") return;
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          hiraToggleFlip();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          hiraGo(-1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          hiraGo(1);
+        }
+        return;
+      }
+      if (mainMode === "written" && !writtenPlay.hidden && writtenResult.hidden && writtenSession) {
+        return;
+      }
+      if (mainMode === "quiz" && !quizPlay.hidden && quizResult.hidden && quizSession && !quizAnswered) {
+        if (e.repeat) return;
+        const idx = mcChoiceIndexFromEvent(e);
+        if (idx >= 0 && idx < 4) {
+          const btns = quizOptions.querySelectorAll(".quiz-opt");
+          const b = btns[idx];
+          if (b && !b.disabled) {
+            e.preventDefault();
+            const qs = quizSession.questions[quizQIndex];
+            if (qs) onPickOption(b, qs.choices[idx], qs.correct.meaning);
+          }
+        }
+        return;
+      }
+      if (mainMode !== "cards") return;
+      if (e.target !== card && e.target.tagName === "INPUT") return;
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        toggleFlip();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        go(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        go(1);
+      }
+    });
+
+    fillQuizCountOptions();
+    fillWrittenCountOptions();
+    syncVocabQuizKindTabs();
+    updateVocabQuizSetupHelp();
+    applyHash();
+    prefetchVocabIdle();
+    if (topMode === "hira") {
+      hiraCard.focus({ preventScroll: true });
+    } else if (subjectMode === "kanji") {
+      try {
+        const idxKey = topMode === "n4" ? "n4_kanji_fc_index" : "n5_kanji_fc_index";
+        const savedI = parseInt(localStorage.getItem(idxKey), 10);
+        if (Number.isNaN(savedI)) {
+          const legacy = parseInt(localStorage.getItem("jlpt_fc_index"), 10);
+          if (!Number.isNaN(legacy) && legacy >= 0 && legacy < deck.length) index = legacy;
+        } else if (savedI >= 0 && savedI < deck.length) {
+          index = savedI;
+        }
+        render();
+      } catch (_) {
+        applyFilter();
+      }
+      card.focus({ preventScroll: true });
+    }
+  </script>
+</body>
+</html>

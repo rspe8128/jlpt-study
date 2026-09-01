@@ -1,0 +1,14 @@
+# 교재 PDF (저작권 자료 — 사이트 동작에 불필요)
+*.pdf
+*.jpg
+
+# 빌드 부산물
+__pycache__/
+scripts/__pycache__/
+archive/
+reports/
+node_modules/
+.vercel/
+
+# 교재에서 추출한 원문 텍스트 (저작권 자료)
+data/sources/
