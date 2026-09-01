@@ -12,3 +12,6 @@ node_modules/
 
 # 교재에서 추출한 원문 텍스트 (저작권 자료)
 data/sources/
+
+.vercel
+.env*
